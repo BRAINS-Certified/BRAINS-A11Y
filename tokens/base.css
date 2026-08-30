@@ -1,0 +1,151 @@
+/*
+ * brains-a11y — axis behaviour (brand-agnostic)
+ * ---------------------------------------------------------------------------
+ * The eight viewing-preference axes, expressed only as behaviour. This file
+ * contains NO brand colours or typefaces — it consumes tokens that a brand
+ * file (tokens/shard.css or tokens/brains.css) defines.
+ *
+ * Every axis is driven by a data-* attribute on <html>, and every axis has a
+ * default that renders as "no preference applied". An absent attribute must
+ * always read as the stock appearance, so a page renders correctly when
+ * storage is blocked, JavaScript fails, or the script has not run yet.
+ *
+ *   data-theme         midnight | bone
+ *   data-density       comfortable | compact
+ *   data-motion        full | reduced
+ *   data-contrast      default | high
+ *   data-text-size     s | m | l
+ *   data-line-spacing  tight | standard | roomy
+ *   data-reading-font  standard | hyperlegible
+ *   data-accent        gold | teal | blue
+ */
+
+:root {
+  /* Axis outputs. Brand files must not redefine these. */
+  --a11y-text-scale: 1;
+  --a11y-line-height: 1.6;
+  --a11y-density: 1;
+  --a11y-motion-duration: 200ms;
+
+  /* Spacing rhythm. Components should use these rather than fixed padding,
+     which is what makes density work without enumerating utility classes. */
+  --space-1: calc(0.25rem * var(--a11y-density));
+  --space-2: calc(0.5rem  * var(--a11y-density));
+  --space-3: calc(0.75rem * var(--a11y-density));
+  --space-4: calc(1rem    * var(--a11y-density));
+  --space-6: calc(1.5rem  * var(--a11y-density));
+  --space-8: calc(2rem    * var(--a11y-density));
+  --space-12: calc(3rem   * var(--a11y-density));
+  --space-16: calc(4rem   * var(--a11y-density));
+}
+
+/* ── Text size ──────────────────────────────────────────────────────────────
+ * Scales the root font size so every rem-based measurement follows. Small is
+ * -10%, large +15%, matching the approved control set. */
+:root[data-text-size='s'] { --a11y-text-scale: 0.9; }
+:root[data-text-size='m'] { --a11y-text-scale: 1; }
+:root[data-text-size='l'] { --a11y-text-scale: 1.15; }
+
+html { font-size: calc(100% * var(--a11y-text-scale)); }
+
+/* ── Line spacing ────────────────────────────────────────────────────────── */
+:root[data-line-spacing='tight']    { --a11y-line-height: 1.4; }
+:root[data-line-spacing='standard'] { --a11y-line-height: 1.6; }
+:root[data-line-spacing='roomy']    { --a11y-line-height: 1.9; }
+
+body { line-height: var(--a11y-line-height); }
+
+/* ── Density ────────────────────────────────────────────────────────────────
+ * Compact reduces the spacing rhythm to ~72%. Deliberately implemented as a
+ * single scalar rather than a list of utility-class overrides: the earlier
+ * shard-audit implementation enumerated exact Tailwind classes (.mb-28, .mb-24,
+ * …) and its own comment recommended this refactor, because any new spacing
+ * class silently escaped the compact treatment. */
+:root[data-density='comfortable'] { --a11y-density: 1; }
+:root[data-density='compact']     { --a11y-density: 0.72; }
+
+/* ── Motion ─────────────────────────────────────────────────────────────────
+ * Honour the OS setting first; the explicit control can only ever reduce
+ * motion further, never re-enable it against a system preference. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --a11y-motion-duration: 0ms; }
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:root[data-motion='reduced'] { --a11y-motion-duration: 0ms; }
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation-duration: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Reading font ───────────────────────────────────────────────────────────
+ * Atkinson Hyperlegible, chosen for letter-form differentiation. Italics are
+ * dropped because sustained italic text defeats the purpose; emphasis falls
+ * back to weight. */
+:root[data-reading-font='hyperlegible'] {
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+  --font-display: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+}
+:root[data-reading-font='hyperlegible'] em,
+:root[data-reading-font='hyperlegible'] i,
+:root[data-reading-font='hyperlegible'] cite {
+  font-style: normal;
+  font-weight: 600;
+}
+:root[data-reading-font='hyperlegible'] p { margin-block: 1em; }
+
+/* ── Contrast ───────────────────────────────────────────────────────────────
+ * High contrast strengthens borders and lifts muted text to full ink. Brand
+ * files supply --ink-muted-high and --line-high for their own palette. */
+:root[data-contrast='high'] {
+  --ink-muted: var(--ink-muted-high, var(--ink));
+  --line: var(--line-high, currentColor);
+}
+:root[data-contrast='high'] :focus-visible {
+  outline-width: 3px;
+}
+
+/* ── Focus, always ──────────────────────────────────────────────────────────
+ * Never removed by any axis. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring, currentColor);
+  outline-offset: 2px;
+}
+
+/* ── Skip link ──────────────────────────────────────────────────────────── */
+.a11y-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-body);
+  text-decoration: none;
+  border-radius: 3px;
+}
+.a11y-skip-link:focus {
+  left: var(--space-2);
+  top: var(--space-2);
+}
+
+/* ── Screen-reader-only utility ─────────────────────────────────────────── */
+.a11y-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

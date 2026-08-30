@@ -1,0 +1,72 @@
+/*
+ * brains-a11y — Shard brand tokens
+ * ---------------------------------------------------------------------------
+ * Palette and type for Shard surfaces. Import AFTER tokens/base.css.
+ *
+ *   @import 'brains-a11y/tokens/base.css';
+ *   @import 'brains-a11y/tokens/shard.css';
+ *
+ * Every colour pair here is verified by scripts/check-contrast.mjs, which CI
+ * runs. Do not add a pair without adding it there first.
+ *
+ * ⚠ Gold on light grounds is #7A5500, NOT #D99518.
+ *   Shard Brand Guidelines v1.0 state that Brand Deep #D99518 gives 4.6:1 on
+ *   white and passes AA. Measured, it is 2.54:1 and fails at every text size.
+ *   #7A5500 measures 6.72:1 on white and 5.75:1 on Bone. See docs/CONTRAST.md.
+ *   Bright gold #FCC14D remains correct on dark grounds (11.11:1) and is for
+ *   fills and marks on light grounds only — never text.
+ */
+
+:root,
+:root[data-theme='midnight'] {
+  --bg: #0A1628;             /* Shard Night */
+  --surface: #132842;
+  --surface-2: #1A3050;
+  --ink: #E2E8F0;
+  --ink-muted: #94A3B8;
+  --ink-muted-high: #CBD5E1; /* contrast=high */
+  --line: rgba(255, 255, 255, 0.10);
+  --line-high: rgba(255, 255, 255, 0.38);
+  --overlay-bg: #132842;
+
+  --accent: #FCC14D;         /* 11.11:1 on bg */
+  --accent-ink: #0A1628;
+  --focus-ring: rgba(252, 193, 77, 0.75);
+
+  --font-display: 'Lexend', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+}
+
+:root[data-theme='bone'] {
+  --bg: #F5EDD8;
+  --surface: #FFFFFF;
+  --surface-2: #EFE7D2;
+  --ink: #0A1628;
+  --ink-muted: #475569;
+  --ink-muted-high: #1E293B;
+  --line: rgba(10, 22, 40, 0.12);
+  --line-high: rgba(10, 22, 40, 0.45);
+  --overlay-bg: #FFFFFF;
+
+  --accent: #7A5500;         /* 5.75:1 on bg · 6.72:1 on surface */
+  --accent-ink: #FFFFFF;
+  --focus-ring: rgba(122, 85, 0, 0.75);
+}
+
+/* ── Accent swap ────────────────────────────────────────────────────────────
+ * Each accent has a dark-ground and a light-ground value; both are verified.
+ * Red is deliberately absent: Shard reserves #EF4444 to mean "score 1". */
+:root[data-accent='teal']            { --accent: #5EEAD4; --accent-ink: #0A1628; --focus-ring: rgba(94, 234, 212, 0.75); }
+:root[data-accent='blue']            { --accent: #93C5FD; --accent-ink: #0A1628; --focus-ring: rgba(147, 197, 253, 0.75); }
+:root[data-theme='bone'][data-accent='gold'] { --accent: #7A5500; --accent-ink: #FFFFFF; --focus-ring: rgba(122, 85, 0, 0.75); }
+:root[data-theme='bone'][data-accent='teal'] { --accent: #0F766E; --accent-ink: #FFFFFF; --focus-ring: rgba(15, 118, 110, 0.75); }
+:root[data-theme='bone'][data-accent='blue'] { --accent: #1D4ED8; --accent-ink: #FFFFFF; --focus-ring: rgba(29, 78, 216, 0.75); }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+h1, h2, h3, h4 { font-family: var(--font-display); }
+code, kbd, samp, pre, .tabular { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }

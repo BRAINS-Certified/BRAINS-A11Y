@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Contrast first: it is the cheapest check and the one this package
+      # exists to enforce. A failing pair should stop the build before
+      # anything else runs.
+      - name: Verify contrast of every shipped colour pair
+        run: node scripts/check-contrast.mjs
+
+      - name: Test
+        run: node --test
+
+      - name: Build the IIFE bundle
+        run: node scripts/build-iife.mjs
+
+      - name: Fail if the committed bundle is stale
+        run: git diff --exit-code dist/
