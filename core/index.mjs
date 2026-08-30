@@ -42,6 +42,17 @@
 
 export const STORAGE_KEY = 'brains.a11y.v1';
 
+/**
+ * Legacy storage schemes, read once on first run so nobody loses a preference
+ * they had already set. Two shapes exist: a JSON blob under one key, and
+ * shard-books-site's separate `sb:*` string keys.
+ */
+export const LEGACY_SEPARATE_KEYS = {
+  'sb:theme': 'theme',
+  'sb:text-size': 'textSize',
+  'sb:line-spacing': 'lineSpacing',
+};
+
 /** Storage keys from the pre-consolidation implementations, read once on migrate. */
 export const LEGACY_KEYS = {
   /** shard-audit — density/motion/contrast/accent */
@@ -119,17 +130,35 @@ export function apply(prefs, root) {
 }
 
 /**
- * Read stored preferences, migrating from the legacy keys on first run.
+ * The theme to use when the person has never chosen one. Follows the operating
+ * system rather than forcing a default, so a light-mode user is not shown a
+ * dark page on first visit.
+ * @returns {Theme}
+ */
+export function systemTheme() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return DEFAULTS.theme;
+  }
+  try {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'bone' : 'midnight';
+  } catch {
+    return DEFAULTS.theme;
+  }
+}
+
+/**
+ * Read stored preferences, migrating from every legacy scheme on first run.
+ * An unset theme follows the operating system.
  * @returns {Preferences}
  */
 export function read() {
   if (typeof window === 'undefined') return { ...DEFAULTS };
   const stored = parse(safeGet(STORAGE_KEY));
-  if (stored) return normalise(stored);
+  if (stored) return normalise({ theme: systemTheme(), ...stored });
 
   // No canonical value yet — fold in anything the old implementations left.
   /** @type {Record<string, unknown>} */
-  const migrated = {};
+  const migrated = { theme: systemTheme() };
   for (const [key, map] of Object.entries(LEGACY_KEYS)) {
     const legacy = parse(safeGet(key));
     if (!legacy) continue;
@@ -137,6 +166,12 @@ export function read() {
       if (value !== undefined) migrated[axis] = value;
     }
   }
+  for (const [key, axis] of Object.entries(LEGACY_SEPARATE_KEYS)) {
+    const value = safeGet(key);
+    if (value) migrated[axis] = value;
+  }
+  if (safeGet('sb:dyslexia') === 'true') migrated.readingFont = 'hyperlegible';
+
   return normalise(migrated);
 }
 
@@ -180,7 +215,34 @@ export function update(current, change, root) {
   if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
     window.dispatchEvent(new CustomEvent('brains-a11y:change', { detail: next }));
   }
+  announce(change);
   return next;
+}
+
+/**
+ * Speak the change through a polite live region. A sighted user sees the
+ * page reflow; a screen-reader user gets nothing unless we say so.
+ * @param {Partial<Preferences>} change
+ */
+export function announce(change) {
+  if (typeof document === 'undefined') return;
+  const entries = Object.entries(change).filter(([axis]) => axis in AXES);
+  if (entries.length !== 1) return;
+  const [axis, value] = entries[0];
+  const labels = /** @type {any} */ (LABELS)[axis];
+  if (!labels || !labels[value]) return;
+
+  let region = document.getElementById('brains-a11y-live');
+  if (!region) {
+    region = document.createElement('div');
+    region.id = 'brains-a11y-live';
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    region.className = 'a11y-sr-only';
+    document.body.appendChild(region);
+  }
+  region.textContent = '';
+  region.textContent = `${labels._} set to ${labels[value]}`;
 }
 
 /**

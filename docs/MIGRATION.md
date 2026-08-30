@@ -9,7 +9,12 @@ preference they had already set.
 | Legacy key | Written by | Axes recovered |
 |---|---|---|
 | `brains.prefs` | shard-audit | density, motion, contrast, accent |
-| `shard.viewing.v1` | shard-financial-tool, shard-books-site | theme, text size, line spacing, and `dyslexia: true` → `readingFont: 'hyperlegible'` |
+| `shard.viewing.v1` | shard-financial-tool | theme, text size, line spacing, and `dyslexia: true` → `readingFont: 'hyperlegible'` |
+| `sb:theme`, `sb:text-size`, `sb:line-spacing`, `sb:dyslexia` | shard-books-site | the same four axes, but as separate string keys rather than a JSON blob |
+
+An unset theme follows `prefers-color-scheme` rather than forcing Midnight —
+shard-books-site already did this, and losing it would have shown light-mode
+visitors a dark page on their first visit.
 
 Migration is read-only: the old keys are left in place, so a rollback loses
 nothing. Remove them only once every surface is on the package.
