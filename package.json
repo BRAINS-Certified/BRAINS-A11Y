@@ -1,0 +1,32 @@
+{
+  "name": "@brains/a11y",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The BRAINS accessibility standard — eight viewing-preference axes, one implementation, shared across every Shard and BRAINS surface.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "repository": { "type": "git", "url": "git+https://github.com/BRAINS-Certified/brains-a11y.git" },
+  "exports": {
+    ".": "./core/index.mjs",
+    "./core": "./core/index.mjs",
+    "./core/no-flash": "./core/no-flash.mjs",
+    "./react": "./react/index.jsx",
+    "./astro/NoFlash.astro": "./astro/NoFlash.astro",
+    "./astro/A11yPanel.astro": "./astro/A11yPanel.astro",
+    "./tokens/base.css": "./tokens/base.css",
+    "./tokens/shard.css": "./tokens/shard.css",
+    "./tokens/brains.css": "./tokens/brains.css",
+    "./tokens/panel.css": "./tokens/panel.css",
+    "./dist/brains-a11y.js": "./dist/brains-a11y.js"
+  },
+  "files": ["core", "react", "astro", "tokens", "dist", "docs", "README.md"],
+  "scripts": {
+    "build": "node scripts/build-iife.mjs",
+    "test": "node --test",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "verify": "npm run check:contrast && npm test && npm run build"
+  },
+  "peerDependencies": { "react": ">=18" },
+  "peerDependenciesMeta": { "react": { "optional": true } },
+  "engines": { "node": ">=20" }
+}

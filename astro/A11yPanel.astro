@@ -1,0 +1,77 @@
+---
+/**
+ * brains-a11y — control panel for Astro, with no client framework.
+ *
+ * Renders real <button role="radio"> markup server-side, then attaches
+ * behaviour from the vanilla core. Works without React; degrades to inert
+ * but correctly-labelled controls if JavaScript never arrives.
+ *
+ * Props:
+ *   axes  — subset of axis names to show, in order (default: all eight)
+ *   title — heading text
+ */
+import { AXES, LABELS } from '../core/index.mjs';
+
+const { axes, title = 'Viewing preferences' } = Astro.props;
+const shown = axes && axes.length ? axes : Object.keys(AXES);
+---
+<div class="a11y-panel" data-a11y-panel>
+  <div class="a11y-panel__head">
+    <h2 class="a11y-panel__title">{title}</h2>
+    <p class="a11y-panel__note">
+      Saved to this device only. Nothing is sent anywhere and nothing is tracked.
+    </p>
+  </div>
+
+  {shown.map((axis) => (
+    <fieldset class="a11y-panel__axis">
+      <legend class="a11y-panel__legend">{LABELS[axis]._}</legend>
+      <div role="radiogroup" aria-label={LABELS[axis]._} class="a11y-panel__options">
+        {AXES[axis].map((option) => (
+          <button
+            type="button"
+            role="radio"
+            aria-checked="false"
+            class="a11y-panel__option"
+            data-axis={axis}
+            data-value={option}
+          >{LABELS[axis][option]}</button>
+        ))}
+      </div>
+    </fieldset>
+  ))}
+
+  <button type="button" class="a11y-panel__reset" data-a11y-reset>Reset to defaults</button>
+</div>
+
+<script>
+  import { read, update, DEFAULTS, subscribe } from '../core/index.mjs';
+
+  let prefs = read();
+
+  function paint() {
+    document.querySelectorAll('[data-a11y-panel] [data-axis]').forEach((button) => {
+      const active = prefs[button.dataset.axis] === button.dataset.value;
+      button.setAttribute('aria-checked', String(active));
+      if (active) button.setAttribute('data-active', '');
+      else button.removeAttribute('data-active');
+    });
+  }
+
+  document.querySelectorAll('[data-a11y-panel] [data-axis]').forEach((button) => {
+    button.addEventListener('click', () => {
+      prefs = update(prefs, { [button.dataset.axis]: button.dataset.value });
+      paint();
+    });
+  });
+
+  document.querySelectorAll('[data-a11y-reset]').forEach((button) => {
+    button.addEventListener('click', () => {
+      prefs = update(prefs, DEFAULTS);
+      paint();
+    });
+  });
+
+  subscribe((next) => { prefs = next; paint(); });
+  paint();
+</script>

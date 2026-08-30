@@ -1,0 +1,17 @@
+---
+/**
+ * brains-a11y — no-flash script for Astro.
+ *
+ * Put this in <head>, as early as possible and before any stylesheet that
+ * depends on a data-* attribute. It is inlined deliberately: loading it as a
+ * file would reintroduce the flash it exists to prevent.
+ *
+ *   <head>
+ *     <NoFlash />
+ *     <link rel="stylesheet" href="/styles/global.css" />
+ *   </head>
+ */
+import { noFlashScript } from '../core/no-flash.mjs';
+const script = noFlashScript();
+---
+<script is:inline set:html={script}></script>
