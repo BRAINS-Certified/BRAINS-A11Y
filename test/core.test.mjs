@@ -63,3 +63,11 @@ test('the no-flash script names both legacy storage keys', () => {
   assert.ok(script.includes('brains.prefs'));
   assert.ok(script.includes('shard.viewing.v1'));
 });
+
+test('the no-flash script covers all three legacy schemes and the OS theme', () => {
+  const script = noFlashScript();
+  for (const marker of ['brains.prefs', 'shard.viewing.v1', 'sb:theme', 'sb:dyslexia',
+                        'prefers-color-scheme']) {
+    assert.ok(script.includes(marker), `script handles ${marker}`);
+  }
+});
