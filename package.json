@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "build": "node scripts/build-iife.mjs",
-    "test": "node --test",
+    "test": "node --test \"test/*.test.mjs\"",
     "check:contrast": "node scripts/check-contrast.mjs",
     "verify": "npm run check:contrast && npm test && npm run build",
     "test:browser": "node test/browser/build-fixture.mjs && node test/browser/axes.spec.mjs"

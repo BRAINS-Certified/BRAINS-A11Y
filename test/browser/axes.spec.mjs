@@ -8,7 +8,10 @@
  * correctly and every aria-checked was right — the DOM looked perfect and the
  * page did not move. Asserting on attributes would have passed all three.
  *
- *   node test/browser/build-fixture.mjs && node test/browser/axes.spec.mjs
+ *   npm run test:browser
+ *
+ * Kept out of the default `npm test` glob on purpose: Node's runner treats
+ * every file under test/ as a spec, and this one needs a browser.
  *
  * Needs Playwright with Chromium. Not wired into the default CI job, which is
  * dependency-free by design; run it before any release that touches CSS.
