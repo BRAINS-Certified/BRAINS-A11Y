@@ -3,10 +3,18 @@
 ## Before you push
 
 ```bash
-npm run verify
+npm run verify        # contrast + unit tests + build — no dependencies
+npm run test:browser  # every axis clicked in a real browser — needs Playwright
 ```
 
-Contrast, tests and the IIFE build all have to pass.
+`verify` is dependency-free and runs in CI. **`test:browser` is required before
+any release that touches CSS**, because unit tests cannot see that a rule lost
+a specificity fight — three axes once shipped setting every attribute correctly
+while moving nothing on screen. See `docs/SPEC.md`.
+
+Playwright is not a dependency here. Either install it locally
+(`npm i -D playwright && npx playwright install chromium`) or point
+`PLAYWRIGHT_PATH` at an existing checkout.
 
 ## The rules that matter
 

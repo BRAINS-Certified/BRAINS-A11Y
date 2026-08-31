@@ -10,6 +10,19 @@
  * always read as the stock appearance, so a page renders correctly when
  * storage is blocked, JavaScript fails, or the script has not run yet.
  *
+ * Two axes — contrast and reading-font — write tokens the brand files also own.
+ * The brand files sit in the `brains-a11y-brand` cascade layer and this file is
+ * unlayered, so these rules win without a specificity fight. Do not layer this
+ * file, and do not unlayer the brand files: contrast and reading-font silently
+ * stop working if either happens.
+ *
+ * Axis rules are bound to the attribute, not to :root. :root still matches, so
+ * a normal page is unaffected — but any container carrying the attributes scopes
+ * them to its own subtree, which is what makes a settings preview pane, or two
+ * brands side by side, possible. A container that also needs text-size and
+ * line-spacing to apply must carry `data-a11y-scope`, because those two work by
+ * setting font-size and line-height rather than by inheriting a variable alone.
+ *
  *   data-theme         midnight | bone
  *   data-density       comfortable | compact
  *   data-motion        full | reduced
@@ -27,8 +40,18 @@
   --a11y-density: 1;
   --a11y-motion-duration: 200ms;
 
-  /* Spacing rhythm. Components should use these rather than fixed padding,
-     which is what makes density work without enumerating utility classes. */
+}
+
+/* Spacing rhythm. Components use these rather than fixed padding, which is what
+ * makes density work without enumerating utility classes.
+ *
+ * Declared on every element, not on :root, and the reason is load-bearing: a
+ * custom property is substituted at the element where it is DECLARED, so
+ * `--space-4: calc(1rem * var(--a11y-density))` on :root resolves --a11y-density
+ * once, at :root, and inherits an already-fixed length. A density change deeper
+ * in the tree then moves nothing. Re-declaring per element makes each one
+ * resolve its own inherited density. */
+*, *::before, *::after {
   --space-1: calc(0.25rem * var(--a11y-density));
   --space-2: calc(0.5rem  * var(--a11y-density));
   --space-3: calc(0.75rem * var(--a11y-density));
@@ -42,18 +65,20 @@
 /* ── Text size ──────────────────────────────────────────────────────────────
  * Scales the root font size so every rem-based measurement follows. Small is
  * -10%, large +15%, matching the approved control set. */
-:root[data-text-size='s'] { --a11y-text-scale: 0.9; }
-:root[data-text-size='m'] { --a11y-text-scale: 1; }
-:root[data-text-size='l'] { --a11y-text-scale: 1.15; }
+[data-text-size='s'] { --a11y-text-scale: 0.9; }
+[data-text-size='m'] { --a11y-text-scale: 1; }
+[data-text-size='l'] { --a11y-text-scale: 1.15; }
 
-html { font-size: calc(100% * var(--a11y-text-scale)); }
+html,
+[data-a11y-scope] { font-size: calc(100% * var(--a11y-text-scale)); }
 
 /* ── Line spacing ────────────────────────────────────────────────────────── */
-:root[data-line-spacing='tight']    { --a11y-line-height: 1.4; }
-:root[data-line-spacing='standard'] { --a11y-line-height: 1.6; }
-:root[data-line-spacing='roomy']    { --a11y-line-height: 1.9; }
+[data-line-spacing='tight']    { --a11y-line-height: 1.4; }
+[data-line-spacing='standard'] { --a11y-line-height: 1.6; }
+[data-line-spacing='roomy']    { --a11y-line-height: 1.9; }
 
-body { line-height: var(--a11y-line-height); }
+body,
+[data-a11y-scope] { line-height: var(--a11y-line-height); }
 
 /* ── Density ────────────────────────────────────────────────────────────────
  * Compact reduces the spacing rhythm to ~72%. Deliberately implemented as a
@@ -61,8 +86,8 @@ body { line-height: var(--a11y-line-height); }
  * shard-audit implementation enumerated exact Tailwind classes (.mb-28, .mb-24,
  * …) and its own comment recommended this refactor, because any new spacing
  * class silently escaped the compact treatment. */
-:root[data-density='comfortable'] { --a11y-density: 1; }
-:root[data-density='compact']     { --a11y-density: 0.72; }
+[data-density='comfortable'] { --a11y-density: 1; }
+[data-density='compact']     { --a11y-density: 0.72; }
 
 /* ── Motion ─────────────────────────────────────────────────────────────────
  * Honour the OS setting first; the explicit control can only ever reduce
@@ -77,10 +102,10 @@ body { line-height: var(--a11y-line-height); }
   }
 }
 
-:root[data-motion='reduced'] { --a11y-motion-duration: 0ms; }
-:root[data-motion='reduced'] *,
-:root[data-motion='reduced'] *::before,
-:root[data-motion='reduced'] *::after {
+[data-motion='reduced'] { --a11y-motion-duration: 0ms; }
+[data-motion='reduced'] *,
+[data-motion='reduced'] *::before,
+[data-motion='reduced'] *::after {
   animation-duration: 0ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0ms !important;
@@ -91,26 +116,26 @@ body { line-height: var(--a11y-line-height); }
  * Atkinson Hyperlegible, chosen for letter-form differentiation. Italics are
  * dropped because sustained italic text defeats the purpose; emphasis falls
  * back to weight. */
-:root[data-reading-font='hyperlegible'] {
+[data-reading-font='hyperlegible'] {
   --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
   --font-display: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
 }
-:root[data-reading-font='hyperlegible'] em,
-:root[data-reading-font='hyperlegible'] i,
-:root[data-reading-font='hyperlegible'] cite {
+[data-reading-font='hyperlegible'] em,
+[data-reading-font='hyperlegible'] i,
+[data-reading-font='hyperlegible'] cite {
   font-style: normal;
   font-weight: 600;
 }
-:root[data-reading-font='hyperlegible'] p { margin-block: 1em; }
+[data-reading-font='hyperlegible'] p { margin-block: 1em; }
 
 /* ── Contrast ───────────────────────────────────────────────────────────────
  * High contrast strengthens borders and lifts muted text to full ink. Brand
  * files supply --ink-muted-high and --line-high for their own palette. */
-:root[data-contrast='high'] {
+[data-contrast='high'] {
   --ink-muted: var(--ink-muted-high, var(--ink));
   --line: var(--line-high, currentColor);
 }
-:root[data-contrast='high'] :focus-visible {
+[data-contrast='high'] :focus-visible {
   outline-width: 3px;
 }
 

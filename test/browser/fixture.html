@@ -1,0 +1,793 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>fixture</title>
+<style>
+/*
+ * brains-a11y — axis behaviour (brand-agnostic)
+ * ---------------------------------------------------------------------------
+ * The eight viewing-preference axes, expressed only as behaviour. This file
+ * contains NO brand colours or typefaces — it consumes tokens that a brand
+ * file (tokens/shard.css or tokens/brains.css) defines.
+ *
+ * Every axis is driven by a data-* attribute on <html>, and every axis has a
+ * default that renders as "no preference applied". An absent attribute must
+ * always read as the stock appearance, so a page renders correctly when
+ * storage is blocked, JavaScript fails, or the script has not run yet.
+ *
+ * Two axes — contrast and reading-font — write tokens the brand files also own.
+ * The brand files sit in the `brains-a11y-brand` cascade layer and this file is
+ * unlayered, so these rules win without a specificity fight. Do not layer this
+ * file, and do not unlayer the brand files: contrast and reading-font silently
+ * stop working if either happens.
+ *
+ * Axis rules are bound to the attribute, not to :root. :root still matches, so
+ * a normal page is unaffected — but any container carrying the attributes scopes
+ * them to its own subtree, which is what makes a settings preview pane, or two
+ * brands side by side, possible. A container that also needs text-size and
+ * line-spacing to apply must carry `data-a11y-scope`, because those two work by
+ * setting font-size and line-height rather than by inheriting a variable alone.
+ *
+ *   data-theme         midnight | bone
+ *   data-density       comfortable | compact
+ *   data-motion        full | reduced
+ *   data-contrast      default | high
+ *   data-text-size     s | m | l
+ *   data-line-spacing  tight | standard | roomy
+ *   data-reading-font  standard | hyperlegible
+ *   data-accent        gold | teal | blue
+ */
+
+:root {
+  /* Axis outputs. Brand files must not redefine these. */
+  --a11y-text-scale: 1;
+  --a11y-line-height: 1.6;
+  --a11y-density: 1;
+  --a11y-motion-duration: 200ms;
+
+}
+
+/* Spacing rhythm. Components use these rather than fixed padding, which is what
+ * makes density work without enumerating utility classes.
+ *
+ * Declared on every element, not on :root, and the reason is load-bearing: a
+ * custom property is substituted at the element where it is DECLARED, so
+ * `--space-4: calc(1rem * var(--a11y-density))` on :root resolves --a11y-density
+ * once, at :root, and inherits an already-fixed length. A density change deeper
+ * in the tree then moves nothing. Re-declaring per element makes each one
+ * resolve its own inherited density. */
+*, *::before, *::after {
+  --space-1: calc(0.25rem * var(--a11y-density));
+  --space-2: calc(0.5rem  * var(--a11y-density));
+  --space-3: calc(0.75rem * var(--a11y-density));
+  --space-4: calc(1rem    * var(--a11y-density));
+  --space-6: calc(1.5rem  * var(--a11y-density));
+  --space-8: calc(2rem    * var(--a11y-density));
+  --space-12: calc(3rem   * var(--a11y-density));
+  --space-16: calc(4rem   * var(--a11y-density));
+}
+
+/* ── Text size ──────────────────────────────────────────────────────────────
+ * Scales the root font size so every rem-based measurement follows. Small is
+ * -10%, large +15%, matching the approved control set. */
+[data-text-size='s'] { --a11y-text-scale: 0.9; }
+[data-text-size='m'] { --a11y-text-scale: 1; }
+[data-text-size='l'] { --a11y-text-scale: 1.15; }
+
+html,
+[data-a11y-scope] { font-size: calc(100% * var(--a11y-text-scale)); }
+
+/* ── Line spacing ────────────────────────────────────────────────────────── */
+[data-line-spacing='tight']    { --a11y-line-height: 1.4; }
+[data-line-spacing='standard'] { --a11y-line-height: 1.6; }
+[data-line-spacing='roomy']    { --a11y-line-height: 1.9; }
+
+body,
+[data-a11y-scope] { line-height: var(--a11y-line-height); }
+
+/* ── Density ────────────────────────────────────────────────────────────────
+ * Compact reduces the spacing rhythm to ~72%. Deliberately implemented as a
+ * single scalar rather than a list of utility-class overrides: the earlier
+ * shard-audit implementation enumerated exact Tailwind classes (.mb-28, .mb-24,
+ * …) and its own comment recommended this refactor, because any new spacing
+ * class silently escaped the compact treatment. */
+[data-density='comfortable'] { --a11y-density: 1; }
+[data-density='compact']     { --a11y-density: 0.72; }
+
+/* ── Motion ─────────────────────────────────────────────────────────────────
+ * Honour the OS setting first; the explicit control can only ever reduce
+ * motion further, never re-enable it against a system preference. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --a11y-motion-duration: 0ms; }
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+[data-motion='reduced'] { --a11y-motion-duration: 0ms; }
+[data-motion='reduced'] *,
+[data-motion='reduced'] *::before,
+[data-motion='reduced'] *::after {
+  animation-duration: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Reading font ───────────────────────────────────────────────────────────
+ * Atkinson Hyperlegible, chosen for letter-form differentiation. Italics are
+ * dropped because sustained italic text defeats the purpose; emphasis falls
+ * back to weight. */
+[data-reading-font='hyperlegible'] {
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+  --font-display: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+}
+[data-reading-font='hyperlegible'] em,
+[data-reading-font='hyperlegible'] i,
+[data-reading-font='hyperlegible'] cite {
+  font-style: normal;
+  font-weight: 600;
+}
+[data-reading-font='hyperlegible'] p { margin-block: 1em; }
+
+/* ── Contrast ───────────────────────────────────────────────────────────────
+ * High contrast strengthens borders and lifts muted text to full ink. Brand
+ * files supply --ink-muted-high and --line-high for their own palette. */
+[data-contrast='high'] {
+  --ink-muted: var(--ink-muted-high, var(--ink));
+  --line: var(--line-high, currentColor);
+}
+[data-contrast='high'] :focus-visible {
+  outline-width: 3px;
+}
+
+/* ── Focus, always ──────────────────────────────────────────────────────────
+ * Never removed by any axis. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring, currentColor);
+  outline-offset: 2px;
+}
+
+/* ── Skip link ──────────────────────────────────────────────────────────── */
+.a11y-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-body);
+  text-decoration: none;
+  border-radius: 3px;
+}
+.a11y-skip-link:focus {
+  left: var(--space-2);
+  top: var(--space-2);
+}
+
+/* ── Screen-reader-only utility ─────────────────────────────────────────── */
+.a11y-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * brains-a11y — Shard brand tokens
+ * ---------------------------------------------------------------------------
+ * Palette and type for Shard surfaces. Import AFTER tokens/base.css.
+ *
+ *   @import 'brains-a11y/tokens/base.css';
+ *   @import 'brains-a11y/tokens/shard.css';
+ *
+ * Every colour pair here is verified by scripts/check-contrast.mjs, which CI
+ * runs. Do not add a pair without adding it there first.
+ *
+ * ⚠ Gold on light grounds is #7A5500, NOT #D99518.
+ *   Shard Brand Guidelines v1.0 state that Brand Deep #D99518 gives 4.6:1 on
+ *   white and passes AA. Measured, it is 2.54:1 and fails at every text size.
+ *   #7A5500 measures 6.72:1 on white and 5.75:1 on Bone. See docs/CONTRAST.md.
+ *   Bright gold #FCC14D remains correct on dark grounds (11.11:1) and is for
+ *   fills and marks on light grounds only — never text.
+  *
+ * Wrapped in the `brains-a11y-brand` cascade layer. Layered styles lose to
+ * unlayered ones regardless of specificity, which is how the axis rules in
+ * base.css override brand tokens (contrast lifts --ink-muted, reading-font
+ * swaps --font-body) without a specificity fight they would otherwise lose
+ * on source order.
+ */
+
+@layer brains-a11y-brand {
+  .brand-shard,
+  .brand-shard[data-theme='midnight'] {
+    --bg: #0A1628;             /* Shard Night */
+    --surface: #132842;
+    --surface-2: #1A3050;
+    --ink: #E2E8F0;
+    --ink-muted: #94A3B8;
+    --ink-muted-high: #CBD5E1; /* contrast=high */
+    --line: rgba(255, 255, 255, 0.10);
+    --line-high: rgba(255, 255, 255, 0.38);
+    --overlay-bg: #132842;
+
+    --accent: #FCC14D;         /* 11.11:1 on bg */
+    --accent-ink: #0A1628;
+    --focus-ring: rgba(252, 193, 77, 0.75);
+
+    --font-display: 'Lexend', system-ui, -apple-system, sans-serif;
+    --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, monospace;
+  }
+
+  .brand-shard[data-theme='bone'] {
+    --bg: #F5EDD8;
+    --surface: #FFFFFF;
+    --surface-2: #EFE7D2;
+    --ink: #0A1628;
+    --ink-muted: #475569;
+    --ink-muted-high: #1E293B;
+    --line: rgba(10, 22, 40, 0.12);
+    --line-high: rgba(10, 22, 40, 0.45);
+    --overlay-bg: #FFFFFF;
+
+    --accent: #7A5500;         /* 5.75:1 on bg · 6.72:1 on surface */
+    --accent-ink: #FFFFFF;
+    --focus-ring: rgba(122, 85, 0, 0.75);
+  }
+
+  /* ── Accent swap ────────────────────────────────────────────────────────────
+   * Each accent has a dark-ground and a light-ground value; both are verified.
+   * Red is deliberately absent: Shard reserves #EF4444 to mean "score 1". */
+  .brand-shard[data-accent='teal']            { --accent: #5EEAD4; --accent-ink: #0A1628; --focus-ring: rgba(94, 234, 212, 0.75); }
+  .brand-shard[data-accent='blue']            { --accent: #93C5FD; --accent-ink: #0A1628; --focus-ring: rgba(147, 197, 253, 0.75); }
+  .brand-shard[data-theme='bone'][data-accent='gold'] { --accent: #7A5500; --accent-ink: #FFFFFF; --focus-ring: rgba(122, 85, 0, 0.75); }
+  .brand-shard[data-theme='bone'][data-accent='teal'] { --accent: #0F766E; --accent-ink: #FFFFFF; --focus-ring: rgba(15, 118, 110, 0.75); }
+  .brand-shard[data-theme='bone'][data-accent='blue'] { --accent: #1D4ED8; --accent-ink: #FFFFFF; --focus-ring: rgba(29, 78, 216, 0.75); }
+
+  .brand-shard {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  .brand-shard h1, .brand-shard h2, .brand-shard h3, .brand-shard h4 { font-family: var(--font-display); }
+  .brand-shard code, .brand-shard .tabular { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+}
+
+/*
+ * brains-a11y — BRAINS brand tokens
+ * ---------------------------------------------------------------------------
+ * Palette and type for BRAINS surfaces. Import AFTER tokens/base.css.
+ *
+ *   @import 'brains-a11y/tokens/base.css';
+ *   @import 'brains-a11y/tokens/brains.css';
+ *
+ * BRAINS sets Atkinson Hyperlegible as the DEFAULT body face — a deliberate
+ * accessibility stance carried over from the audit platform, where the most
+ * legible face should not be something a user has to go and find. The
+ * reading-font axis therefore changes nothing on BRAINS surfaces except to
+ * switch headings to Atkinson as well.
+ *
+ * ⚠ Gold on light grounds is #7A5500 — see the note in tokens/shard.css.
+  *
+ * Wrapped in the `brains-a11y-brand` cascade layer. Layered styles lose to
+ * unlayered ones regardless of specificity, which is how the axis rules in
+ * base.css override brand tokens (contrast lifts --ink-muted, reading-font
+ * swaps --font-body) without a specificity fight they would otherwise lose
+ * on source order.
+ */
+
+@layer brains-a11y-brand {
+  .brand-brains,
+  .brand-brains[data-theme='midnight'] {
+    --bg: #0A0A0A;
+    --surface: #131313;
+    --surface-2: #181818;
+    --ink: #F5F5F5;
+    --ink-muted: #9B9B9B;
+    --ink-muted-high: #E0E0E0;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-high: rgba(255, 255, 255, 0.36);
+    --overlay-bg: #181818;
+
+    --accent: #FCC14D;         /* 12.14:1 on bg */
+    --accent-ink: #0A0A0A;
+    --focus-ring: rgba(252, 193, 77, 0.75);
+
+    --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  .brand-brains[data-theme='bone'] {
+    --bg: #FFFFFF;
+    --surface: #F5F5F5;
+    --surface-2: #EBEBEB;
+    --ink: #1A1A1A;
+    --ink-muted: #5A5A5A;
+    --ink-muted-high: #1A1A1A;
+    --line: rgba(0, 0, 0, 0.10);
+    --line-high: rgba(0, 0, 0, 0.45);
+    --overlay-bg: #FFFFFF;
+
+    --accent: #7A5500;         /* 6.72:1 on bg */
+    --accent-ink: #FFFFFF;
+    --focus-ring: rgba(122, 85, 0, 0.75);
+  }
+
+  .brand-brains[data-accent='teal']            { --accent: #5EEAD4; --accent-ink: #0A0A0A; --focus-ring: rgba(94, 234, 212, 0.75); }
+  .brand-brains[data-accent='blue']            { --accent: #93C5FD; --accent-ink: #0A0A0A; --focus-ring: rgba(147, 197, 253, 0.75); }
+  .brand-brains[data-theme='bone'][data-accent='gold'] { --accent: #7A5500; --accent-ink: #FFFFFF; --focus-ring: rgba(122, 85, 0, 0.75); }
+  .brand-brains[data-theme='bone'][data-accent='teal'] { --accent: #0F766E; --accent-ink: #FFFFFF; --focus-ring: rgba(15, 118, 110, 0.75); }
+  .brand-brains[data-theme='bone'][data-accent='blue'] { --accent: #1D4ED8; --accent-ink: #FFFFFF; --focus-ring: rgba(29, 78, 216, 0.75); }
+
+  .brand-brains {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  .brand-brains h1, .brand-brains h2, .brand-brains h3, .brand-brains h4 { font-family: var(--font-display); }
+  .brand-brains code, .brand-brains .tabular { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+}
+
+/*
+ * brains-a11y — control panel styling.
+ * Consumes brand tokens only; contains no colour literals, so it inherits
+ * whichever brand file the site imported and follows every axis including
+ * density and contrast.
+ */
+
+.a11y-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--overlay-bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  max-width: 22rem;
+}
+
+.a11y-panel__head { display: flex; flex-direction: column; gap: var(--space-1); }
+
+.a11y-panel__title {
+  font-family: var(--font-display);
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.a11y-panel__note { font-size: 0.8125em; color: var(--ink-muted); margin: 0; }
+
+.a11y-panel__axis { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+
+.a11y-panel__legend {
+  font-size: 0.6875em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0;
+}
+
+.a11y-panel__options { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--space-2); }
+
+.a11y-panel__option,
+.a11y-panel__reset {
+  font: inherit;
+  font-size: 0.8125em;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background var(--a11y-motion-duration), border-color var(--a11y-motion-duration);
+}
+
+.a11y-panel__option[data-active] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+  font-weight: 500;
+}
+
+.a11y-panel__option:hover:not([data-active]),
+.a11y-panel__reset:hover { border-color: var(--ink-muted); }
+
+.a11y-panel__reset { align-self: flex-start; color: var(--ink-muted); }
+
+/* Touch targets stay at least 44px regardless of density (WCAG 2.2 AA 2.5.8). */
+.a11y-panel__option, .a11y-panel__reset { min-height: 44px; }
+
+.scope{background:var(--bg);color:var(--ink);font-family:var(--font-body)}
+.surface{padding:1.5em}
+.surface h3{font-family:var(--font-display);font-size:1.3em}
+.surface p.muted{color:var(--ink-muted)}
+.surface .card{background:var(--surface);border:1px solid var(--line);padding:var(--space-4)}
+.surface .stat{font-family:var(--font-mono);color:var(--accent)}
+.surface .cta{background:var(--accent);color:var(--accent-ink);border:0;
+  padding:var(--space-2) var(--space-4);transition:opacity var(--a11y-motion-duration)}
+.panelwrap{padding:0 1.5em 1.5em}
+</style></head><body>
+
+  <div class="scope brand-shard" id="scope-shard" data-a11y-scope
+       data-theme="midnight" data-density="comfortable" data-motion="full"
+       data-contrast="default" data-text-size="m" data-line-spacing="standard"
+       data-reading-font="standard" data-accent="gold">
+    <div class="surface" id="surface-shard">
+      <h3>Heading</h3>
+      <p>Body copy.</p>
+      <p class="muted">Muted copy.</p>
+      <div class="card"><span class="stat">4.3</span></div>
+      <button class="cta" type="button">Action</button>
+    </div>
+    <div class="panelwrap" id="panelwrap-shard"></div>
+  </div>
+
+  <div class="scope brand-brains" id="scope-brains" data-a11y-scope
+       data-theme="midnight" data-density="comfortable" data-motion="full"
+       data-contrast="default" data-text-size="m" data-line-spacing="standard"
+       data-reading-font="standard" data-accent="gold">
+    <div class="surface" id="surface-brains">
+      <h3>Heading</h3>
+      <p>Body copy.</p>
+      <p class="muted">Muted copy.</p>
+      <div class="card"><span class="stat">4.3</span></div>
+      <button class="cta" type="button">Action</button>
+    </div>
+    <div class="panelwrap" id="panelwrap-brains"></div>
+  </div>
+<script>/* brains-a11y core — IIFE build. Generated by scripts/build-iife.mjs; do not edit. */
+;(function (global) {
+/**
+ * brains-a11y core — framework-agnostic viewing preferences.
+ *
+ * Zero dependencies, no build step. Works as an ES module in a browser, in a
+ * bundler, or (via core/brains-a11y.iife.js) as a plain <script> tag on a
+ * static page with no toolchain at all.
+ *
+ * The eight axes are the union of what shipped independently across the
+ * estate: shard-audit had density/motion/contrast/accent, the Shard Books app
+ * and site had theme/text-size/line-spacing/reading-font. Neither had more
+ * than five. This is the full set, defined once.
+ *
+ * Design rules, all of them load-bearing:
+ *   - Every default renders as the stock appearance, so a page with no stored
+ *     preference, blocked storage, or failed JS looks correct.
+ *   - Storage failures degrade silently. Preferences are cosmetic; a private
+ *     window must not throw.
+ *   - Unknown or corrupt values fall back per-axis, never wholesale.
+ *   - Nothing here is persisted server-side and nothing is tracked.
+ */
+
+/** @typedef {'midnight'|'bone'} Theme */
+/** @typedef {'comfortable'|'compact'} Density */
+/** @typedef {'full'|'reduced'} Motion */
+/** @typedef {'default'|'high'} Contrast */
+/** @typedef {'s'|'m'|'l'} TextSize */
+/** @typedef {'tight'|'standard'|'roomy'} LineSpacing */
+/** @typedef {'standard'|'hyperlegible'} ReadingFont */
+/** @typedef {'gold'|'teal'|'blue'} Accent */
+
+/**
+ * @typedef {object} Preferences
+ * @property {Theme} theme
+ * @property {Density} density
+ * @property {Motion} motion
+ * @property {Contrast} contrast
+ * @property {TextSize} textSize
+ * @property {LineSpacing} lineSpacing
+ * @property {ReadingFont} readingFont
+ * @property {Accent} accent
+ */
+
+const STORAGE_KEY = 'brains.a11y.v1';
+
+/**
+ * Legacy storage schemes, read once on first run so nobody loses a preference
+ * they had already set. Two shapes exist: a JSON blob under one key, and
+ * shard-books-site's separate `sb:*` string keys.
+ */
+const LEGACY_SEPARATE_KEYS = {
+  'sb:theme': 'theme',
+  'sb:text-size': 'textSize',
+  'sb:line-spacing': 'lineSpacing',
+};
+
+/** Storage keys from the pre-consolidation implementations, read once on migrate. */
+const LEGACY_KEYS = {
+  /** shard-audit — density/motion/contrast/accent */
+  'brains.prefs': (v) => ({
+    density: v.density, motion: v.motion, contrast: v.contrast, accent: v.accent,
+  }),
+  /** shard-financial-tool and shard-books-site — theme/textSize/lineSpacing/dyslexia */
+  'shard.viewing.v1': (v) => ({
+    theme: v.theme,
+    textSize: v.textSize,
+    lineSpacing: v.lineSpacing,
+    readingFont: v.dyslexia === true ? 'hyperlegible' : undefined,
+  }),
+};
+
+/** Allowed values per axis. First entry is the default. */
+const AXES = /** @type {const} */ ({
+  theme: ['midnight', 'bone'],
+  density: ['comfortable', 'compact'],
+  motion: ['full', 'reduced'],
+  contrast: ['default', 'high'],
+  textSize: ['m', 's', 'l'],
+  lineSpacing: ['standard', 'tight', 'roomy'],
+  readingFont: ['standard', 'hyperlegible'],
+  accent: ['gold', 'teal', 'blue'],
+});
+
+/** The data-* attribute each axis writes to <html>. */
+const ATTRIBUTES = /** @type {const} */ ({
+  theme: 'data-theme',
+  density: 'data-density',
+  motion: 'data-motion',
+  contrast: 'data-contrast',
+  textSize: 'data-text-size',
+  lineSpacing: 'data-line-spacing',
+  readingFont: 'data-reading-font',
+  accent: 'data-accent',
+});
+
+/** @type {Preferences} */
+const DEFAULTS = Object.freeze(
+  /** @type {any} */ (
+    Object.fromEntries(Object.entries(AXES).map(([axis, values]) => [axis, values[0]]))
+  ),
+);
+
+/**
+ * Coerce an unknown blob into a fully-populated Preferences object.
+ * Each axis falls back independently, so one corrupt value cannot discard
+ * the user's other choices.
+ * @param {unknown} input
+ * @returns {Preferences}
+ */
+function normalise(input) {
+  const source = input && typeof input === 'object' ? /** @type {any} */ (input) : {};
+  const out = /** @type {any} */ ({});
+  for (const [axis, values] of Object.entries(AXES)) {
+    const value = source[axis];
+    out[axis] = typeof value === 'string' && values.includes(value) ? value : values[0];
+  }
+  return out;
+}
+
+/**
+ * Apply preferences to a document element. Idempotent.
+ * @param {Preferences} prefs
+ * @param {HTMLElement} [root]
+ */
+function apply(prefs, root) {
+  const el = root || (typeof document !== 'undefined' ? document.documentElement : null);
+  if (!el) return;
+  for (const [axis, attribute] of Object.entries(ATTRIBUTES)) {
+    el.setAttribute(attribute, /** @type {any} */ (prefs)[axis]);
+  }
+}
+
+/**
+ * The theme to use when the person has never chosen one. Follows the operating
+ * system rather than forcing a default, so a light-mode user is not shown a
+ * dark page on first visit.
+ * @returns {Theme}
+ */
+function systemTheme() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return DEFAULTS.theme;
+  }
+  try {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'bone' : 'midnight';
+  } catch {
+    return DEFAULTS.theme;
+  }
+}
+
+/**
+ * Read stored preferences, migrating from every legacy scheme on first run.
+ * An unset theme follows the operating system.
+ * @returns {Preferences}
+ */
+function read() {
+  if (typeof window === 'undefined') return { ...DEFAULTS };
+  const stored = parse(safeGet(STORAGE_KEY));
+  if (stored) return normalise({ theme: systemTheme(), ...stored });
+
+  // No canonical value yet — fold in anything the old implementations left.
+  /** @type {Record<string, unknown>} */
+  const migrated = { theme: systemTheme() };
+  for (const [key, map] of Object.entries(LEGACY_KEYS)) {
+    const legacy = parse(safeGet(key));
+    if (!legacy) continue;
+    for (const [axis, value] of Object.entries(map(legacy))) {
+      if (value !== undefined) migrated[axis] = value;
+    }
+  }
+  for (const [key, axis] of Object.entries(LEGACY_SEPARATE_KEYS)) {
+    const value = safeGet(key);
+    if (value) migrated[axis] = value;
+  }
+  if (safeGet('sb:dyslexia') === 'true') migrated.readingFont = 'hyperlegible';
+
+  return normalise(migrated);
+}
+
+/**
+ * Persist preferences. Silently does nothing if storage is unavailable —
+ * the in-memory state and the applied attributes still work for the session.
+ * @param {Preferences} prefs
+ */
+function write(prefs) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+  } catch {
+    /* private mode, quota, or storage disabled — cosmetic setting, fail open */
+  }
+}
+
+/**
+ * Read, apply and return the current preferences. The normal entry point for
+ * a page that is not using a framework wrapper.
+ * @param {HTMLElement} [root]
+ * @returns {Preferences}
+ */
+function init(root) {
+  const prefs = read();
+  apply(prefs, root);
+  return prefs;
+}
+
+/**
+ * Merge a partial change, then apply, persist and notify.
+ * @param {Preferences} current
+ * @param {Partial<Preferences>} change
+ * @param {HTMLElement} [root]
+ * @returns {Preferences} the merged result
+ */
+function update(current, change, root) {
+  const next = normalise({ ...current, ...change });
+  apply(next, root);
+  write(next);
+  if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
+    window.dispatchEvent(new CustomEvent('brains-a11y:change', { detail: next }));
+  }
+  announce(change);
+  return next;
+}
+
+/**
+ * Speak the change through a polite live region. A sighted user sees the
+ * page reflow; a screen-reader user gets nothing unless we say so.
+ * @param {Partial<Preferences>} change
+ */
+function announce(change) {
+  if (typeof document === 'undefined') return;
+  const entries = Object.entries(change).filter(([axis]) => axis in AXES);
+  if (entries.length !== 1) return;
+  const [axis, value] = entries[0];
+  const labels = /** @type {any} */ (LABELS)[axis];
+  if (!labels || !labels[value]) return;
+
+  let region = document.getElementById('brains-a11y-live');
+  if (!region) {
+    region = document.createElement('div');
+    region.id = 'brains-a11y-live';
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    region.className = 'a11y-sr-only';
+    document.body.appendChild(region);
+  }
+  region.textContent = '';
+  region.textContent = `${labels._} set to ${labels[value]}`;
+}
+
+/**
+ * Subscribe to preference changes, including changes made in another tab.
+ * @param {(prefs: Preferences) => void} handler
+ * @returns {() => void} unsubscribe
+ */
+function subscribe(handler) {
+  if (typeof window === 'undefined') return () => {};
+  const onChange = (/** @type {any} */ event) => handler(event.detail);
+  const onStorage = (/** @type {StorageEvent} */ event) => {
+    if (event.key !== STORAGE_KEY) return;
+    const next = normalise(parse(event.newValue));
+    apply(next);
+    handler(next);
+  };
+  window.addEventListener('brains-a11y:change', onChange);
+  window.addEventListener('storage', onStorage);
+  return () => {
+    window.removeEventListener('brains-a11y:change', onChange);
+    window.removeEventListener('storage', onStorage);
+  };
+}
+
+/** Human-readable labels for building a control panel. */
+const LABELS = Object.freeze({
+  theme: { _: 'Theme', midnight: 'Midnight', bone: 'Bone' },
+  density: { _: 'Density', comfortable: 'Comfortable', compact: 'Compact' },
+  motion: { _: 'Motion', full: 'Full', reduced: 'Reduced' },
+  contrast: { _: 'Contrast', default: 'Default', high: 'High' },
+  textSize: { _: 'Text size', s: 'Small', m: 'Default', l: 'Large' },
+  lineSpacing: { _: 'Line spacing', tight: 'Tight', standard: 'Standard', roomy: 'Roomy' },
+  readingFont: { _: 'Reading font', standard: 'Standard', hyperlegible: 'Hyperlegible' },
+  accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },
+});
+
+/* ── internals ─────────────────────────────────────────────────────────── */
+
+function safeGet(/** @type {string} */ key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function parse(/** @type {string|null} */ raw) {
+  if (!raw) return null;
+  try {
+    const value = JSON.parse(raw);
+    return value && typeof value === 'object' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+(function () {
+  var A = window.BrainsA11y;
+  ['shard', 'brains'].forEach(function (brand) {
+    var target = document.getElementById('scope-' + brand);
+    var host = document.getElementById('panelwrap-' + brand);
+    var prefs = Object.assign({}, A.DEFAULTS);
+    var buttons = [];
+    var panel = document.createElement('div');
+    panel.className = 'a11y-panel';
+    Object.keys(A.AXES).forEach(function (axis) {
+      var group = document.createElement('div');
+      group.setAttribute('role', 'radiogroup');
+      group.setAttribute('aria-label', A.LABELS[axis]._);
+      group.className = 'a11y-panel__options';
+      A.AXES[axis].forEach(function (value) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('role', 'radio');
+        b.className = 'a11y-panel__option';
+        b.setAttribute('data-axis', axis);
+        b.setAttribute('data-value', value);
+        b.textContent = A.LABELS[axis][value];
+        b.addEventListener('click', function () {
+          prefs[axis] = value; A.apply(prefs, target); paint();
+        });
+        buttons.push(b); group.appendChild(b);
+      });
+      panel.appendChild(group);
+    });
+    function paint() {
+      buttons.forEach(function (b) {
+        var on = prefs[b.getAttribute('data-axis')] === b.getAttribute('data-value');
+        b.setAttribute('aria-checked', String(on));
+        if (on) b.setAttribute('data-active', ''); else b.removeAttribute('data-active');
+      });
+    }
+    host.appendChild(panel); A.apply(prefs, target); paint();
+  });
+})();
+</script></body></html>
