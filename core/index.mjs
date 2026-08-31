@@ -59,6 +59,20 @@ export const LEGACY_KEYS = {
   'brains.prefs': (v) => ({
     density: v.density, motion: v.motion, contrast: v.contrast, accent: v.accent,
   }),
+  /**
+   * shard-website — the live Shard Labs marketing site. Same four axes again,
+   * but with its own casing: theme 'light' rather than 'bone', textSize 'S'
+   * rather than 's', lineSpacing 'Standard' rather than 'standard'. Adopting
+   * the package without this would have silently discarded every visitor's
+   * saved preference on shardlabs.com.au.
+   */
+  'shard.prefs': (v) => ({
+    theme: v.theme === 'light' ? 'bone' : v.theme,
+    textSize: typeof v.textSize === 'string' ? v.textSize.toLowerCase() : undefined,
+    lineSpacing: typeof v.lineSpacing === 'string' ? v.lineSpacing.toLowerCase() : undefined,
+    readingFont: v.dyslexia === true ? 'hyperlegible' : undefined,
+  }),
+
   /** shard-financial-tool and shard-books-site — theme/textSize/lineSpacing/dyslexia */
   'shard.viewing.v1': (v) => ({
     theme: v.theme,

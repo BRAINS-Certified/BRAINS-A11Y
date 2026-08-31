@@ -40,6 +40,11 @@ else{
   var l0=j(g('brains.prefs'));if(l0)set(l0);
   var l1=j(g('shard.viewing.v1'));
   if(l1){set(l1);if(l1.dyslexia===true)p.readingFont='hyperlegible'}
+  var l2=j(g('shard.prefs'));
+  if(l2){set({theme:l2.theme==='light'?'bone':l2.theme,
+    textSize:typeof l2.textSize==='string'?l2.textSize.toLowerCase():undefined,
+    lineSpacing:typeof l2.lineSpacing==='string'?l2.lineSpacing.toLowerCase():undefined});
+    if(l2.dyslexia===true)p.readingFont='hyperlegible'}
   var s2={};for(var n in C.sep){var sv=g(n);if(sv)s2[C.sep[n]]=sv}set(s2);
   if(g('sb:dyslexia')==='true')p.readingFont='hyperlegible';
 }

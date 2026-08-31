@@ -179,3 +179,25 @@ test('every trigger icon and group icon exists in the set', async () => {
   for (const name of TRIGGER_ICONS) assert.ok(ICONS[name], `trigger icon ${name}`);
   for (const group of GROUPS) assert.ok(ICONS[group.icon] || AXIS_ICONS[group.icon], `group icon ${group.icon}`);
 });
+
+test('shard.prefs casing maps onto the canonical vocabulary', async () => {
+  const { LEGACY_KEYS } = await import('../core/index.mjs');
+  const mapped = LEGACY_KEYS['shard.prefs']({
+    theme: 'light', textSize: 'L', lineSpacing: 'Roomy', dyslexia: true,
+  });
+  assert.equal(mapped.theme, 'bone', "'light' is this site's name for Bone");
+  assert.equal(mapped.textSize, 'l');
+  assert.equal(mapped.lineSpacing, 'roomy');
+  assert.equal(mapped.readingFont, 'hyperlegible');
+  assert.deepEqual(normalise(mapped, false), {
+    ...DEFAULTS, theme: 'bone', textSize: 'l', lineSpacing: 'roomy',
+    readingFont: 'hyperlegible',
+  });
+});
+
+test('the no-flash script covers all four legacy schemes', () => {
+  const script = noFlashScript();
+  for (const key of ['brains.prefs', 'shard.viewing.v1', 'sb:theme', 'shard.prefs']) {
+    assert.ok(script.includes(key), `script reads ${key}`);
+  }
+});

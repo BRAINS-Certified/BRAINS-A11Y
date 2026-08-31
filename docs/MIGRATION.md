@@ -11,6 +11,7 @@ preference they had already set.
 | `brains.prefs` | shard-audit | density, motion, contrast, accent |
 | `shard.viewing.v1` | shard-financial-tool | theme, text size, line spacing, and `dyslexia: true` → `readingFont: 'hyperlegible'` |
 | `sb:theme`, `sb:text-size`, `sb:line-spacing`, `sb:dyslexia` | shard-books-site | the same four axes, but as separate string keys rather than a JSON blob |
+| `shard.prefs` | shard-website (shardlabs.com.au) | the same four axes again, with its own casing — `light` for Bone, `S`/`M`/`L`, `Standard`/`Tight`/`Roomy` |
 
 An unset theme follows `prefers-color-scheme` rather than forcing Midnight —
 shard-books-site already did this, and losing it would have shown light-mode
