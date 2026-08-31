@@ -31,7 +31,8 @@
     --ink-muted: #9B9B9B;
     --ink-muted-high: #E0E0E0;
     --line: rgba(255, 255, 255, 0.08);
-    --line-high: rgba(255, 255, 255, 0.36);
+    --control-border: #6A6A6A;   /* >=3:1 both grounds — SC 1.4.11 */
+  --line-high: rgba(255, 255, 255, 0.36);
     --overlay-bg: #181818;
 
   
@@ -58,6 +59,7 @@
     --ink-muted: #5A5A5A;
     --ink-muted-high: #1A1A1A;
     --line: rgba(0, 0, 0, 0.10);
+    --control-border: #818181;   /* >=3:1 both grounds — SC 1.4.11 */
     --line-high: rgba(0, 0, 0, 0.45);
     --overlay-bg: #FFFFFF;
 

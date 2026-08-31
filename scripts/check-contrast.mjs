@@ -96,6 +96,16 @@ export const PAIRS = [
   ['#7A5500', '#F7EFE0', 'AA',       'shard/bone tint-warm accent on bg'],
   ['#7A5500', '#EAF0F4', 'AA',       'shard/bone tint-cool accent on bg'],
 
+  // ── Interactive control boundaries need 3:1 — SC 1.4.11 ──────────────────
+  ['#697A92', '#0A1628', 'AA-large', 'shard/midnight control border on bg'],
+  ['#697A92', '#132842', 'AA-large', 'shard/midnight control border on surface'],
+  ['#7D735C', '#F5EDD8', 'AA-large', 'shard/bone control border on bg'],
+  ['#7D735C', '#FFFFFF', 'AA-large', 'shard/bone control border on surface'],
+  ['#6A6A6A', '#0A0A0A', 'AA-large', 'brains/midnight control border on bg'],
+  ['#6A6A6A', '#131313', 'AA-large', 'brains/midnight control border on surface'],
+  ['#818181', '#FFFFFF', 'AA-large', 'brains/bone control border on bg'],
+  ['#818181', '#F5F5F5', 'AA-large', 'brains/bone control border on surface'],
+
   // ── High-contrast muted text must reach AAA ──────────────────────────────
   ['#CBD5E1', '#0A1628', 'AAA',      'shard/midnight ink-muted-high on bg'],
   ['#1E293B', '#F5EDD8', 'AAA',      'shard/bone ink-muted-high on bg'],

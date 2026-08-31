@@ -7,17 +7,19 @@
  * but correctly-labelled controls if JavaScript never arrives.
  *
  * Props:
- *   axes  — subset of axis names to show, in order (default: all eight)
- *   title — heading text
+ *   axes         — subset of axis names to show, in order (default: all)
+ *   title        — heading text
+ *   headingLevel — 1-6, default 2, so the panel fits the host page's outline
  */
 import { AXES, LABELS } from '../core/index.mjs';
 
-const { axes, title = 'Viewing preferences' } = Astro.props;
+const { axes, title = 'Viewing preferences', headingLevel = 2 } = Astro.props;
+const Heading = `h${Math.min(Math.max(headingLevel, 1), 6)}`;
 const shown = axes && axes.length ? axes : Object.keys(AXES);
 ---
 <div class="a11y-panel" data-a11y-panel>
   <div class="a11y-panel__head">
-    <h2 class="a11y-panel__title">{title}</h2>
+    <Heading class="a11y-panel__title">{title}</Heading>
     <p class="a11y-panel__note">
       Saved to this device only. Nothing is sent anywhere and nothing is tracked.
     </p>
@@ -35,6 +37,7 @@ const shown = axes && axes.length ? axes : Object.keys(AXES);
             class="a11y-panel__option"
             data-axis={axis}
             data-value={option}
+            aria-label={`${LABELS[axis]._}: ${LABELS[axis][option]}`}
           >{LABELS[axis][option]}</button>
         ))}
       </div>

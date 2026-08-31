@@ -88,6 +88,7 @@ ${surface('brains')}
         b.setAttribute('data-axis', axis);
         b.setAttribute('data-value', value);
         b.textContent = A.LABELS[axis][value];
+        b.setAttribute('aria-label', A.LABELS[axis]._ + ': ' + A.LABELS[axis][value]);
         b.addEventListener('click', function () {
           prefs[axis] = value; A.apply(prefs, target); paint();
         });

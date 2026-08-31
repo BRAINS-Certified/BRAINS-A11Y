@@ -34,7 +34,7 @@
   font-size: 0.875em;
   color: var(--a11y-trigger-fg, var(--ink));
   background: var(--a11y-trigger-bg, transparent);
-  border: 1px solid var(--a11y-trigger-border, var(--line));
+  border: 1px solid var(--a11y-trigger-border, var(--control-border, var(--line)));
   border-radius: var(--a11y-trigger-radius, 3px);
   box-shadow: var(--a11y-trigger-shadow, none);
   cursor: pointer;
@@ -117,6 +117,10 @@
   font-family: var(--font-body);
   font-size: 0.75em;
   color: var(--ink-muted);
-  text-decoration: none;
+  /* A link has to be recognisable as one. Removing the underline and relying on
+   * colour fails both "links are recognisable" and "colour is not the only
+   * means of conveying information". */
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 .a11y-mark:hover { color: var(--ink); }

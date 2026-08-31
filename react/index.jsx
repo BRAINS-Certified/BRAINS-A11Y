@@ -72,6 +72,8 @@ export function useA11y() {
  * @param {object} props
  * @param {string[]} [props.axes] subset of axes to show, in order
  * @param {string}   [props.title]
+ * @param {number}   [props.headingLevel] 1–6, default 2. The panel must fit the
+ *   host page's outline: a fixed h2 dropped under an h3 skips a level.
  */
 /**
  * One icon from the set, inline so it inherits colour from the text beside it.
@@ -158,14 +160,15 @@ export function A11yMark({ href = 'https://github.com/BRAINS-Certified/brains-a1
   );
 }
 
-export function A11yPanel({ axes, title = 'Viewing preferences' }) {
+export function A11yPanel({ axes, title = 'Viewing preferences', headingLevel = 2 }) {
+  const Heading = `h${Math.min(Math.max(headingLevel, 1), 6)}`;
   const { prefs, set, reset } = useA11y();
   const shown = axes && axes.length ? axes : Object.keys(AXES);
 
   return (
     <div className="a11y-panel">
       <div className="a11y-panel__head">
-        <h2 className="a11y-panel__title">{title}</h2>
+        <Heading className="a11y-panel__title">{title}</Heading>
         <p className="a11y-panel__note">
           Saved to this device only. Nothing is sent anywhere and nothing is tracked.
         </p>
@@ -200,6 +203,11 @@ export function A11yPanel({ axes, title = 'Viewing preferences' }) {
                   type="button"
                   role="radio"
                   aria-checked={active}
+                  /* "Standard" appears on four different axes. Inside a
+                   * radiogroup a screen reader may or may not announce the
+                   * group name, so each control states its own axis and stays
+                   * unique and descriptive on its own. */
+                  aria-label={`${LABELS[axis]._}: ${LABELS[axis][option]}`}
                   /* Roving tabindex: the group is one tab stop, not five. */
                   tabIndex={active ? 0 : -1}
                   className="a11y-panel__option"

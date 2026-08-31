@@ -17,7 +17,7 @@
 
 <br />
 
-[Try it ↓](#the-eleven-axes) &nbsp;·&nbsp; [Install ↓](#install) &nbsp;·&nbsp; [Evidence ↓](docs/EVIDENCE.md) &nbsp;·&nbsp; [Roadmap ↓](ROADMAP.md)
+[Try it ↓](#the-eleven-axes) &nbsp;·&nbsp; [Install ↓](#install) &nbsp;·&nbsp; [Evidence ↓](docs/EVIDENCE.md) &nbsp;·&nbsp; [Checklist ↓](docs/CHECKLIST.md) &nbsp;·&nbsp; [Roadmap ↓](ROADMAP.md)
 
 </div>
 
@@ -143,7 +143,7 @@ npm run verify        # contrast + unit tests + build — no dependencies, runs 
 npm run test:browser  # every axis, every value, both brands, in real Chromium
 ```
 
-`scripts/check-contrast.mjs` measures **52 colour pairs** and fails the build on any miss.
+`scripts/check-contrast.mjs` measures **60 colour pairs** and fails the build on any miss.
 
 It exists because an approved brand guide told us, in three separate places, to use a gold that gives "4.6:1, AA" on white. It measures **2.54:1** and fails — inside the rule that same guide called the most common accessibility bug. [`docs/CONTRAST.md`](docs/CONTRAST.md) has the full account. **A ratio written in a document is a claim. The script is the evidence.**
 
@@ -160,7 +160,7 @@ react/     A11yProvider · useA11y · A11yPanel · A11yTrigger · A11yMark · Ic
 astro/     NoFlash · A11yPanel · A11yTrigger — no client framework
 assets/    19 icons, one geometric family, plus a sprite
 dist/      brains-a11y.js — IIFE global, for pages with no build step
-docs/      SPEC · EVIDENCE · CONTRAST · MIGRATION · CONFIGURING
+docs/      SPEC · EVIDENCE · CONTRAST · CHECKLIST · MIGRATION · CONFIGURING
 ```
 
 ---
@@ -171,7 +171,14 @@ A surface is compliant when the no-flash script is inlined, `base.css` plus one 
 
 Standards this is built against: **WCAG 2.2 AA** throughout, with SC 1.4.4, 1.4.10, 1.4.12, 2.3.3, 2.5.8 and the ARIA radio-group pattern implemented explicitly. **EN 301 549** mapping — the harmonised standard behind the European Accessibility Act — is on the [roadmap](ROADMAP.md), not done.
 
-We will say what we have measured, and no more than that.
+[`docs/CHECKLIST.md`](docs/CHECKLIST.md) audits the package line by line against
+[The A11Y Project checklist](https://www.a11yproject.com/checklist/), and splits every item into what the
+package owns, what it helps with, and what remains yours. That audit found **five real defects** — control
+borders at 1.08:1, a selected state carried by colour alone, four buttons sharing the accessible name
+"Standard", an underline-free link, and a hardcoded heading level. All fixed; all listed.
+
+Adopting this package does not make a site conformant, and we will not say it does. We will say what we have
+measured, and no more than that.
 
 ---
 
