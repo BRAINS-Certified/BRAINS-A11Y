@@ -85,3 +85,23 @@ test('the IIFE build exports every public symbol the source declares', async () 
     );
   }
 });
+
+test('radiogroup arrow keys wrap, and Home/End jump to the ends', async () => {
+  const { nextIndex } = await import('../core/keyboard.mjs');
+  assert.equal(nextIndex('ArrowRight', 0, 5), 1);
+  assert.equal(nextIndex('ArrowRight', 4, 5), 0, 'wraps forward');
+  assert.equal(nextIndex('ArrowLeft', 0, 5), 4, 'wraps backward');
+  assert.equal(nextIndex('ArrowDown', 1, 5), 2);
+  assert.equal(nextIndex('ArrowUp', 1, 5), 0);
+  assert.equal(nextIndex('Home', 3, 5), 0);
+  assert.equal(nextIndex('End', 1, 5), 4);
+  assert.equal(nextIndex('Tab', 1, 5), -1, 'leaves other keys alone');
+  assert.equal(nextIndex('ArrowRight', 0, 0), -1, 'tolerates an empty group');
+});
+
+test('right-to-left reverses the horizontal arrows only', async () => {
+  const { nextIndex } = await import('../core/keyboard.mjs');
+  assert.equal(nextIndex('ArrowLeft', 0, 3, true), 1);
+  assert.equal(nextIndex('ArrowRight', 0, 3, true), 2);
+  assert.equal(nextIndex('ArrowDown', 0, 3, true), 1, 'vertical is unchanged');
+});

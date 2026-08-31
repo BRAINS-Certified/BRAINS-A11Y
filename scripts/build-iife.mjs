@@ -10,7 +10,13 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
-const source = readFileSync(resolve(root, 'core/index.mjs'), 'utf8');
+/* Both core modules. A static page with no bundler still has to be able to
+ * build a compliant radiogroup, which needs the keyboard helpers — shipping
+ * only index.mjs left those sites unable to honour role="radiogroup". */
+const source = [
+  readFileSync(resolve(root, 'core/index.mjs'), 'utf8'),
+  readFileSync(resolve(root, 'core/keyboard.mjs'), 'utf8'),
+].join('\n\n');
 
 const body = source
   .replace(/^import[^;]+;$/gm, '')

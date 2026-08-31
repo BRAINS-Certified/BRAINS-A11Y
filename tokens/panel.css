@@ -7,6 +7,7 @@
 
 .a11y-panel {
   display: flex;
+  container-type: inline-size;
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-4);
@@ -40,7 +41,14 @@
   padding: 0;
 }
 
-.a11y-panel__options { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--space-2); }
+/* Wraps rather than overflowing. Five options at 200% text in a 320px viewport
+ * would otherwise force horizontal scrolling and fail SC 1.4.10 (Reflow) — in
+ * the control panel whose whole job is to prevent that. */
+.a11y-panel__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.5em, 1fr));
+  gap: var(--space-2);
+}
 
 .a11y-panel__option,
 .a11y-panel__reset {

@@ -10,7 +10,7 @@ the stock appearance, so an absent attribute is always safe.
 | Density | `data-density` | `comfortable` · `compact` | `comfortable` | Scales the spacing rhythm to ~72% |
 | Motion | `data-motion` | `full` · `reduced` | `full` | Zeroes animation and transition durations |
 | Contrast | `data-contrast` | `default` · `high` | `default` | Strengthens borders, lifts muted text, thickens focus rings |
-| Text size | `data-text-size` | `s` · `m` · `l` | `m` | Root font size at 90% / 100% / 115% |
+| Text size | `data-text-size` | `s` · `m` · `l` · `xl` · `xxl` | `m` | Root font size at 87.5% / 100% / 125% / 160% / **200%** |
 | Line spacing | `data-line-spacing` | `tight` · `standard` · `roomy` | `standard` | Body line-height 1.4 / 1.6 / 1.9 |
 | Reading font | `data-reading-font` | `standard` · `hyperlegible` | `standard` | Atkinson Hyperlegible; drops italics for weight |
 | Accent | `data-accent` | `gold` · `teal` · `blue` | `gold` | Swaps the accent token, per theme |
@@ -38,7 +38,17 @@ the control names a typeface choice rather than a person.
    motion; the control can only reduce it further, never re-enable it.
 5. **Focus is never removed** by any axis or any combination of them.
 6. **Touch targets stay ≥44px** regardless of density (WCAG 2.2 AA, 2.5.8).
-7. **Nothing is tracked.** Preferences live in `localStorage` on the device and
+7. **200% text must reflow.** The top of the text-size scale is the benchmark
+   in SC 1.4.4, and a layout that survives it at a 320px viewport also
+   satisfies SC 1.4.10. Browser zoom stacks on top, so a viewer who needs 400%
+   can combine the two.
+8. **`role="radiogroup"` is a promise.** Arrow keys move between options, Home
+   and End reach the ends, and the group is a single tab stop. Announcing the
+   role without honouring it is worse than using plain buttons.
+9. **The OS is asked first.** `prefers-reduced-motion`, `prefers-contrast` and
+   `forced-colors` apply automatically. Someone who has already configured
+   their system should not have to configure every website too.
+10. **Nothing is tracked.** Preferences live in `localStorage` on the device and
    are never sent anywhere.
 
 ## Density, and why it is a scalar

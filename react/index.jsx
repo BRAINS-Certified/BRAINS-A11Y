@@ -21,6 +21,7 @@ import {
 import {
   AXES, DEFAULTS, LABELS, read, apply, update, subscribe,
 } from '../core/index.mjs';
+import { nextIndex, HANDLED_KEYS } from '../core/keyboard.mjs';
 
 const PreferencesContext = createContext(null);
 
@@ -87,7 +88,21 @@ export function A11yPanel({ axes, title = 'Viewing preferences' }) {
       {shown.map((axis) => (
         <fieldset key={axis} className="a11y-panel__axis">
           <legend className="a11y-panel__legend">{LABELS[axis]._}</legend>
-          <div role="radiogroup" aria-label={LABELS[axis]._} className="a11y-panel__options">
+          <div
+            role="radiogroup"
+            aria-label={LABELS[axis]._}
+            className="a11y-panel__options"
+            onKeyDown={(event) => {
+              if (!HANDLED_KEYS.includes(event.key)) return;
+              const options = AXES[axis];
+              const to = nextIndex(event.key, options.indexOf(prefs[axis]), options.length);
+              if (to < 0) return;
+              event.preventDefault();
+              // Selection follows focus — the expected radiogroup behaviour.
+              set({ [axis]: options[to] });
+              event.currentTarget.children[to]?.focus();
+            }}
+          >
             {AXES[axis].map((option) => {
               const active = prefs[axis] === option;
               return (
@@ -96,6 +111,8 @@ export function A11yPanel({ axes, title = 'Viewing preferences' }) {
                   type="button"
                   role="radio"
                   aria-checked={active}
+                  /* Roving tabindex: the group is one tab stop, not five. */
+                  tabIndex={active ? 0 : -1}
                   className="a11y-panel__option"
                   data-active={active || undefined}
                   onClick={() => set({ [axis]: option })}

@@ -45,18 +45,41 @@ const shown = axes && axes.length ? axes : Object.keys(AXES);
 </div>
 
 <script>
-  import { read, update, DEFAULTS, subscribe } from '../core/index.mjs';
+  import { read, update, DEFAULTS, subscribe, AXES } from '../core/index.mjs';
+  import { nextIndex, HANDLED_KEYS, applyRovingTabindex } from '../core/keyboard.mjs';
 
   let prefs = read();
 
   function paint() {
-    document.querySelectorAll('[data-a11y-panel] [data-axis]').forEach((button) => {
-      const active = prefs[button.dataset.axis] === button.dataset.value;
-      button.setAttribute('aria-checked', String(active));
-      if (active) button.setAttribute('data-active', '');
-      else button.removeAttribute('data-active');
+    document.querySelectorAll('[data-a11y-panel] [role="radiogroup"]').forEach((group) => {
+      const options = [...group.querySelectorAll('[data-axis]')];
+      if (!options.length) return;
+      const axis = options[0].dataset.axis;
+      options.forEach((button) => {
+        const active = prefs[axis] === button.dataset.value;
+        button.setAttribute('aria-checked', String(active));
+        if (active) button.setAttribute('data-active', '');
+        else button.removeAttribute('data-active');
+      });
+      applyRovingTabindex(options, AXES[axis].indexOf(prefs[axis]));
     });
   }
+
+  // Arrow keys, Home and End — the contract role="radiogroup" advertises.
+  document.querySelectorAll('[data-a11y-panel] [role="radiogroup"]').forEach((group) => {
+    group.addEventListener('keydown', (event) => {
+      if (!HANDLED_KEYS.includes(event.key)) return;
+      const options = [...group.querySelectorAll('[data-axis]')];
+      const axis = options[0]?.dataset.axis;
+      if (!axis) return;
+      const to = nextIndex(event.key, AXES[axis].indexOf(prefs[axis]), options.length);
+      if (to < 0) return;
+      event.preventDefault();
+      prefs = update(prefs, { [axis]: AXES[axis][to] });
+      paint();
+      options[to].focus();
+    });
+  });
 
   document.querySelectorAll('[data-a11y-panel] [data-axis]').forEach((button) => {
     button.addEventListener('click', () => {
