@@ -52,7 +52,7 @@ const PROBES = {
   lineSpacing: { sel: null,               prop: 'lineHeight' },
   // BRAINS already uses Atkinson for body by design, so the body face does not
   // move there. The display face moves on both brands.
-  readingFont: { sel: 'h3',               prop: 'fontFamily' },
+  readingFont: { sel: 'h2',               prop: 'fontFamily' },
   accent:      { sel: '.stat',            prop: 'color' },
   textSpacing: { sel: 'p',                prop: 'letterSpacing' },
   measure:     { sel: 'p',                prop: 'maxWidth' },

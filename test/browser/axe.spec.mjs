@@ -71,13 +71,10 @@ for (const state of STATES) {
     found.push(`${state.name}: [${v.impact}] ${v.id} — ${v.help} (${v.nodes.length} node(s))`);
   }
 
-  // reset for the next state
-  for (const brand of ['shard', 'brains']) {
-    await page.click(`#panelwrap-${brand} [data-a11y-reset], #panelwrap-${brand} .a11y-panel__reset`)
-      .catch(() => {});
-  }
+  // Reload rather than click a reset control: the fixture renders none, and a
+  // selector that never matches costs a 30-second timeout per state.
   await page.goto(FIXTURE);
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(150);
 }
 
 console.log(`\n  ${found.length === 0 ? 'No axe violations.' : found.length + ' violation(s):'}`);

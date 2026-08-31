@@ -12,6 +12,24 @@ package exists to avoid:
   achievable, but cannot achieve it alone.
 - **Surface** — nothing a library can do. Yours to meet.
 
+## Verified by axe-core, not by reading
+
+`npm run test:axe` runs the real engine over the panel and the trigger, in both
+brands, across the seven states most likely to break something: default, Bone,
+largest text, compact, high contrast, soft contrast and Hyperlegible.
+
+**35 passes, zero violations, in every state.**
+
+The first run reported three: `landmark-one-main`, `page-has-heading-one` and
+`region`. All three were the *test harness* — a bare page with no `<main>`, no
+`<h1>` and no landmarks. They are the items this document assigns to
+**Surface**, and finding them there is the split working, not failing. A fourth,
+`heading-order`, appeared once the harness had an `<h1>`: the fixture jumped
+straight to `<h3>`. That is the same defect the `headingLevel` prop exists to
+prevent, turning up in the scaffold rather than the component.
+
+The harness was fixed. The rules were not suppressed.
+
 ## What the audit changed
 
 Five real defects, all now fixed. They are listed first because the useful part

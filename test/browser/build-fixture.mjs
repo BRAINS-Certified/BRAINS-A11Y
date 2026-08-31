@@ -28,7 +28,7 @@ const surface = (brand) => `
        data-contrast="default" data-text-size="m" data-line-spacing="standard"
        data-reading-font="standard" data-accent="gold">
     <div class="surface" id="surface-${brand}">
-      <h3>Heading</h3>
+      <h2>Heading</h2>
       <p>Body copy.</p>
       <p class="muted">Muted copy.</p>
       <p data-a11y-section>Sectioned copy for the focus guide.</p>
@@ -48,7 +48,7 @@ ${scope(read('tokens/brains.css'), '.brand-brains')}
 ${read('tokens/panel.css')}
 .scope{background:var(--bg);color:var(--ink);font-family:var(--font-body)}
 .surface{padding:1.5em}
-.surface h3{font-family:var(--font-display);font-size:1.3em}
+.surface h2{font-family:var(--font-display);font-size:1.3em}
 .surface p.muted{color:var(--ink-muted)}
 .surface .card{background:var(--surface);border:1px solid var(--line);padding:var(--space-4)}
 .surface .stat{font-family:var(--font-mono);color:var(--accent)}
@@ -56,8 +56,17 @@ ${read('tokens/panel.css')}
   padding:var(--space-2) var(--space-4);transition:opacity var(--a11y-motion-duration)}
 .panelwrap{padding:0 1.5em 1.5em}
 </style></head><body>
+<!-- A valid document, deliberately. axe grades pages as well as components, and
+     a harness missing <main>, an <h1> and landmarks reports three document-level
+     violations that say nothing about the package. Giving the harness real
+     structure means what remains is about the components. -->
+<a class="a11y-skip-link" href="#main">Skip to content</a>
+<header><p>brains-a11y fixture</p></header>
+<main id="main">
+<h1>Accessibility preferences fixture</h1>
 ${surface('shard')}
 ${surface('brains')}
+</main>
 <script>${read('dist/brains-a11y.js')}</script>
 <script type="module">${read('core/reading-guide.mjs').replace(/^export /gm, '')}
 ['shard', 'brains'].forEach(function (b) {

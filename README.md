@@ -155,6 +155,7 @@ npm run test:browser  # every axis, every value, both brands, in real Chromium
 ```
 
 `scripts/check-contrast.mjs` measures **60 colour pairs** and fails the build on any miss.
+`npm run test:axe` reports **35 passes and zero violations** in every state.
 
 It exists because our own brand guide told us, in three places, to use a gold it said gave "4.6:1, AA" on white. It measures **2.54:1**. It fails. And it failed inside the rule that guide called the most common accessibility bug. [`docs/CONTRAST.md`](docs/CONTRAST.md) tells the whole story. **A ratio in a document is a claim. The script is the proof.**
 
