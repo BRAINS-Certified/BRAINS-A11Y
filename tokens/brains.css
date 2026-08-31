@@ -13,55 +13,63 @@
  * switch headings to Atkinson as well.
  *
  * ⚠ Gold on light grounds is #7A5500 — see the note in tokens/shard.css.
+  *
+ * Wrapped in the `brains-a11y-brand` cascade layer. Layered styles lose to
+ * unlayered ones regardless of specificity, which is how the axis rules in
+ * base.css override brand tokens (contrast lifts --ink-muted, reading-font
+ * swaps --font-body) without a specificity fight they would otherwise lose
+ * on source order.
  */
 
-:root,
-:root[data-theme='midnight'] {
-  --bg: #0A0A0A;
-  --surface: #131313;
-  --surface-2: #181818;
-  --ink: #F5F5F5;
-  --ink-muted: #9B9B9B;
-  --ink-muted-high: #E0E0E0;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-high: rgba(255, 255, 255, 0.36);
-  --overlay-bg: #181818;
+@layer brains-a11y-brand {
+  :root,
+  :root[data-theme='midnight'] {
+    --bg: #0A0A0A;
+    --surface: #131313;
+    --surface-2: #181818;
+    --ink: #F5F5F5;
+    --ink-muted: #9B9B9B;
+    --ink-muted-high: #E0E0E0;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-high: rgba(255, 255, 255, 0.36);
+    --overlay-bg: #181818;
 
-  --accent: #FCC14D;         /* 12.14:1 on bg */
-  --accent-ink: #0A0A0A;
-  --focus-ring: rgba(252, 193, 77, 0.75);
+    --accent: #FCC14D;         /* 12.14:1 on bg */
+    --accent-ink: #0A0A0A;
+    --focus-ring: rgba(252, 193, 77, 0.75);
 
-  --font-display: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  :root[data-theme='bone'] {
+    --bg: #FFFFFF;
+    --surface: #F5F5F5;
+    --surface-2: #EBEBEB;
+    --ink: #1A1A1A;
+    --ink-muted: #5A5A5A;
+    --ink-muted-high: #1A1A1A;
+    --line: rgba(0, 0, 0, 0.10);
+    --line-high: rgba(0, 0, 0, 0.45);
+    --overlay-bg: #FFFFFF;
+
+    --accent: #7A5500;         /* 6.72:1 on bg */
+    --accent-ink: #FFFFFF;
+    --focus-ring: rgba(122, 85, 0, 0.75);
+  }
+
+  :root[data-accent='teal']            { --accent: #5EEAD4; --accent-ink: #0A0A0A; --focus-ring: rgba(94, 234, 212, 0.75); }
+  :root[data-accent='blue']            { --accent: #93C5FD; --accent-ink: #0A0A0A; --focus-ring: rgba(147, 197, 253, 0.75); }
+  :root[data-theme='bone'][data-accent='gold'] { --accent: #7A5500; --accent-ink: #FFFFFF; --focus-ring: rgba(122, 85, 0, 0.75); }
+  :root[data-theme='bone'][data-accent='teal'] { --accent: #0F766E; --accent-ink: #FFFFFF; --focus-ring: rgba(15, 118, 110, 0.75); }
+  :root[data-theme='bone'][data-accent='blue'] { --accent: #1D4ED8; --accent-ink: #FFFFFF; --focus-ring: rgba(29, 78, 216, 0.75); }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4 { font-family: var(--font-display); }
+  code, kbd, samp, pre, .tabular { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 }
-
-:root[data-theme='bone'] {
-  --bg: #FFFFFF;
-  --surface: #F5F5F5;
-  --surface-2: #EBEBEB;
-  --ink: #1A1A1A;
-  --ink-muted: #5A5A5A;
-  --ink-muted-high: #1A1A1A;
-  --line: rgba(0, 0, 0, 0.10);
-  --line-high: rgba(0, 0, 0, 0.45);
-  --overlay-bg: #FFFFFF;
-
-  --accent: #7A5500;         /* 6.72:1 on bg */
-  --accent-ink: #FFFFFF;
-  --focus-ring: rgba(122, 85, 0, 0.75);
-}
-
-:root[data-accent='teal']            { --accent: #5EEAD4; --accent-ink: #0A0A0A; --focus-ring: rgba(94, 234, 212, 0.75); }
-:root[data-accent='blue']            { --accent: #93C5FD; --accent-ink: #0A0A0A; --focus-ring: rgba(147, 197, 253, 0.75); }
-:root[data-theme='bone'][data-accent='gold'] { --accent: #7A5500; --accent-ink: #FFFFFF; --focus-ring: rgba(122, 85, 0, 0.75); }
-:root[data-theme='bone'][data-accent='teal'] { --accent: #0F766E; --accent-ink: #FFFFFF; --focus-ring: rgba(15, 118, 110, 0.75); }
-:root[data-theme='bone'][data-accent='blue'] { --accent: #1D4ED8; --accent-ink: #FFFFFF; --focus-ring: rgba(29, 78, 216, 0.75); }
-
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-}
-h1, h2, h3, h4 { font-family: var(--font-display); }
-code, kbd, samp, pre, .tabular { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }

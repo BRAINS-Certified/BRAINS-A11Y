@@ -70,7 +70,8 @@ its brand guide and offers it on the reading-font axis.
 ## Verify
 
 ```bash
-npm run verify      # contrast + tests + build
+npm run verify        # contrast + unit tests + build — dependency-free, runs in CI
+npm run test:browser  # every axis, every value, both brands, in real Chromium
 ```
 
 `scripts/check-contrast.mjs` measures every pair the token files ship and fails
@@ -88,7 +89,7 @@ astro/     NoFlash.astro, A11yPanel.astro              (no client framework)
 dist/      brains-a11y.js — IIFE global, for static pages
 docs/      SPEC.md · CONTRAST.md · MIGRATION.md
 scripts/   check-contrast.mjs · build-iife.mjs
-test/      node:test, no runner dependency
+test/      node:test unit specs · browser/ real-browser axis verification
 ```
 
 ## Compliance

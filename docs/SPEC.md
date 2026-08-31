@@ -66,3 +66,27 @@ A surface is compliant when:
   pre-authentication, error and marketing pages.
 - A skip link is the first focusable element.
 - `npm run check:contrast` passes for any colours the surface adds.
+
+## Verifying an axis actually does something
+
+Attributes and ARIA state are not evidence that an axis works. Three axes once
+shipped in this package doing nothing at all, while setting every attribute
+correctly and reporting the right `aria-checked`:
+
+- **Density** — `--space-*` were declared on `:root` as
+  `calc(1rem * var(--a11y-density))`. A custom property is substituted at the
+  element where it is *declared*, so density resolved once at `:root` and
+  descendants inherited a fixed length. They are now declared on every element.
+- **Contrast** and **reading font** — both write tokens the brand files also
+  own (`--ink-muted`, `--line`, `--font-body`, `--font-display`). At equal
+  specificity the brand file won on source order, because it is imported second.
+  The brand files now sit in the `brains-a11y-brand` cascade layer, and this
+  file is unlayered, so axis rules win without a specificity fight.
+
+**Do not layer `tokens/base.css`, and do not unlayer the brand files.** Contrast
+and reading font silently stop working if either happens, and no attribute
+assertion will catch it.
+
+`npm run test:browser` clicks every value of every axis in both brands and
+asserts an observable computed-style change. Run it before any release that
+touches CSS.
