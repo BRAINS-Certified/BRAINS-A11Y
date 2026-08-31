@@ -301,5 +301,5 @@ function parse(/** @type {string|null} */ raw) {
   }
 }
 
-  global.BrainsA11y = { STORAGE_KEY, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, LABELS, normalise, apply, read, write, init, update, subscribe };
+  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
