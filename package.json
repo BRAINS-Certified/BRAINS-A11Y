@@ -1,9 +1,9 @@
 {
   "name": "@brains/a11y",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "description": "The BRAINS accessibility standard \u2014 eight viewing-preference axes, one implementation, shared across every Shard and BRAINS surface.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "repository": {
     "type": "git",
@@ -20,7 +20,12 @@
     "./tokens/shard.css": "./tokens/shard.css",
     "./tokens/brains.css": "./tokens/brains.css",
     "./tokens/panel.css": "./tokens/panel.css",
-    "./dist/brains-a11y.js": "./dist/brains-a11y.js"
+    "./dist/brains-a11y.js": "./dist/brains-a11y.js",
+    "./core/icons": "./core/icons.mjs",
+    "./core/keyboard": "./core/keyboard.mjs",
+    "./core/reading-guide": "./core/reading-guide.mjs",
+    "./astro/A11yTrigger.astro": "./astro/A11yTrigger.astro",
+    "./tokens/trigger.css": "./tokens/trigger.css"
   },
   "files": [
     "core",
@@ -28,11 +33,13 @@
     "astro",
     "tokens",
     "dist",
+    "assets",
     "docs",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "node scripts/build-iife.mjs",
+    "build": "node scripts/build-iife.mjs && node scripts/build-icons.mjs",
     "test": "node --test \"test/*.test.mjs\"",
     "check:contrast": "node scripts/check-contrast.mjs",
     "verify": "npm run check:contrast && npm test && npm run build",
@@ -48,5 +55,16 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "wcag",
+    "neurodiversity",
+    "dyslexia",
+    "low-vision",
+    "design-system",
+    "preferences",
+    "brains"
+  ]
 }

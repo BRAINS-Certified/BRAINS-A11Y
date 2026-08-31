@@ -56,7 +56,7 @@ eyebrows. Two known cases at the time of writing:
 package ships, and CI fails the build if any pair misses its stated level. A
 ratio written in prose is a claim; the script is the evidence.
 
-```
+```bash
 npm run check:contrast
 ```
 

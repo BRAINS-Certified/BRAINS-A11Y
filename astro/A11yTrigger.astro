@@ -1,0 +1,64 @@
+---
+/**
+ * brains-a11y — the trigger button, for Astro. No client framework.
+ *
+ * Props (all optional):
+ *   variant   'icon' | 'label' | 'pill' | 'fab'                     default 'label'
+ *   placement 'inline' | 'fixed-top-right' | 'fixed-top-left'
+ *             | 'fixed-bottom-right' | 'fixed-bottom-left'          default 'inline'
+ *   label     accessible name and visible text                      default 'Accessibility'
+ *   controls  id of the panel it opens
+ *
+ * Every colour, radius, size and offset is a CSS custom property — see the
+ * header of tokens/trigger.css for the full list a site owner can override.
+ */
+import { iconSvg } from '../core/icons.mjs';
+
+const {
+  variant = 'label',
+  placement = 'inline',
+  label = 'Accessibility',
+  controls,
+} = Astro.props;
+
+const showLabel = variant === 'label' || variant === 'pill';
+const icon = iconSvg('accessibility', { size: variant === 'fab' ? 24 : 20 });
+---
+<button
+  type="button"
+  class="a11y-trigger"
+  data-variant={variant}
+  data-placement={placement}
+  data-a11y-trigger
+  aria-label={showLabel ? undefined : label}
+  aria-haspopup="dialog"
+  aria-expanded="false"
+  aria-controls={controls}
+><Fragment set:html={icon} />{showLabel && <span>{label}</span>}</button>
+
+<script>
+  // Toggles the popover named by aria-controls, closes on Escape and on an
+  // outside click, and returns focus to the trigger — the behaviour a
+  // `aria-haspopup="dialog"` promises.
+  document.querySelectorAll('[data-a11y-trigger]').forEach((trigger) => {
+    const id = trigger.getAttribute('aria-controls');
+    const panel = id && document.getElementById(id);
+    if (!panel) return;
+
+    const open = (next) => {
+      panel.hidden = !next;
+      trigger.setAttribute('aria-expanded', String(next));
+      if (next) panel.querySelector('button, [href], input')?.focus();
+    };
+
+    trigger.addEventListener('click', () => open(panel.hidden));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !panel.hidden) { open(false); trigger.focus(); }
+    });
+    document.addEventListener('click', (event) => {
+      if (panel.hidden) return;
+      if (panel.contains(event.target) || trigger.contains(event.target)) return;
+      open(false);
+    });
+  });
+</script>

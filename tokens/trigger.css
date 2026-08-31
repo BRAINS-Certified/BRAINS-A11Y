@@ -1,0 +1,122 @@
+/*
+ * brains-a11y — the trigger button.
+ *
+ * The control that opens the panel. It has to survive being dropped into a
+ * header nobody designed for it, so everything here is configurable through
+ * tokens and nothing assumes a layout.
+ *
+ * Owner-facing knobs, all overridable on :root or on the button itself:
+ *
+ *   --a11y-trigger-size          44px    tap target; never set below 44
+ *   --a11y-trigger-radius        3px     0 for square, 999px for a pill
+ *   --a11y-trigger-bg            transparent
+ *   --a11y-trigger-fg            var(--ink)
+ *   --a11y-trigger-border        var(--line)
+ *   --a11y-trigger-bg-hover      var(--surface-2)
+ *   --a11y-trigger-shadow        none
+ *   --a11y-trigger-offset        1rem    distance from the edge when floating
+ *   --a11y-trigger-z             2147483001
+ *
+ * Variants are chosen with data-variant, placement with data-placement.
+ */
+
+.a11y-trigger {
+  --_size: var(--a11y-trigger-size, 44px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--_size);
+  min-height: var(--_size);
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-family: var(--font-body);
+  font-size: 0.875em;
+  color: var(--a11y-trigger-fg, var(--ink));
+  background: var(--a11y-trigger-bg, transparent);
+  border: 1px solid var(--a11y-trigger-border, var(--line));
+  border-radius: var(--a11y-trigger-radius, 3px);
+  box-shadow: var(--a11y-trigger-shadow, none);
+  cursor: pointer;
+  transition: background var(--a11y-motion-duration), border-color var(--a11y-motion-duration);
+}
+.a11y-trigger:hover { background: var(--a11y-trigger-bg-hover, var(--surface-2)); }
+.a11y-trigger svg { flex: none; }
+
+/* ── Variants ─────────────────────────────────────────────────────────────── */
+
+/* icon — square, no label. The label still exists for assistive tech. */
+.a11y-trigger[data-variant='icon'] { padding: 0; width: var(--_size); }
+
+/* label — icon plus visible text. The safest default in an unfamiliar header:
+   an icon alone is only obvious to people who already know the convention. */
+.a11y-trigger[data-variant='label'] { padding: 0 var(--space-4); }
+
+/* pill — label variant, fully rounded, filled with the accent. */
+.a11y-trigger[data-variant='pill'] {
+  padding: 0 var(--space-4);
+  border-radius: 999px;
+  background: var(--a11y-trigger-bg, var(--accent));
+  color: var(--a11y-trigger-fg, var(--accent-ink));
+  border-color: var(--a11y-trigger-border, transparent);
+  font-weight: 500;
+}
+.a11y-trigger[data-variant='pill']:hover { filter: brightness(0.94); }
+
+/* fab — a floating circle, for sites with no room in the header. */
+.a11y-trigger[data-variant='fab'] {
+  width: calc(var(--_size) + 8px);
+  height: calc(var(--_size) + 8px);
+  padding: 0;
+  border-radius: 999px;
+  background: var(--a11y-trigger-bg, var(--accent));
+  color: var(--a11y-trigger-fg, var(--accent-ink));
+  border-color: var(--a11y-trigger-border, transparent);
+  box-shadow: var(--a11y-trigger-shadow, 0 2px 6px rgba(0, 0, 0, .2), 0 8px 24px rgba(0, 0, 0, .18));
+}
+
+/* ── Placement ────────────────────────────────────────────────────────────── */
+
+.a11y-trigger[data-placement^='fixed-'] {
+  position: fixed;
+  z-index: var(--a11y-trigger-z, 2147483001);
+}
+.a11y-trigger[data-placement='fixed-top-right']    { top: var(--a11y-trigger-offset, 1rem); right: var(--a11y-trigger-offset, 1rem); }
+.a11y-trigger[data-placement='fixed-top-left']     { top: var(--a11y-trigger-offset, 1rem); left: var(--a11y-trigger-offset, 1rem); }
+.a11y-trigger[data-placement='fixed-bottom-right'] { bottom: var(--a11y-trigger-offset, 1rem); right: var(--a11y-trigger-offset, 1rem); }
+.a11y-trigger[data-placement='fixed-bottom-left']  { bottom: var(--a11y-trigger-offset, 1rem); left: var(--a11y-trigger-offset, 1rem); }
+
+/* A floating trigger must not sit on top of the content at high zoom, where
+   the viewport is small and the button is proportionally large. */
+@media (max-width: 30rem) {
+  .a11y-trigger[data-placement^='fixed-'] { --a11y-trigger-offset: 0.5rem; }
+}
+
+/* Windows High Contrast Mode flattens filled variants; restate the edge. */
+@media (forced-colors: active) {
+  .a11y-trigger { border-color: ButtonBorder; }
+  .a11y-trigger[data-variant='pill'],
+  .a11y-trigger[data-variant='fab'] { background: ButtonFace; color: ButtonText; }
+}
+
+/* ── The panel as a popover next to its trigger ───────────────────────────── */
+
+.a11y-popover {
+  position: absolute;
+  z-index: var(--a11y-trigger-z, 2147483001);
+  max-width: min(22rem, calc(100vw - 2rem));
+}
+.a11y-popover[hidden] { display: none; }
+
+/* ── The mark a site can show to say what it uses ─────────────────────────── */
+
+.a11y-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0.75em;
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+.a11y-mark:hover { color: var(--ink); }

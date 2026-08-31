@@ -36,6 +36,7 @@ reported on.
 Roughly in the order we would take them.
 
 ### Next
+
 - **Preference sync for signed-in viewers.** Settings live on the device today.
   A person who sets them on a laptop should not start again on their phone.
   Needs an opt-in and a clear statement that accessibility settings are
@@ -48,6 +49,7 @@ Roughly in the order we would take them.
   media. Helps metered connections and low-end devices as much as anything.
 
 ### After that
+
 - **VPAT / ACR generation.** The document enterprise buyers ask for before
   signing. Only worth publishing if it is generated from real test output.
 - **EN 301 549 mapping.** The harmonised standard behind the European
@@ -61,6 +63,7 @@ Roughly in the order we would take them.
   BRAINS floor; extend it to UI strings.
 
 ### Considered, not queued
+
 - **A "simplified view" toggle.** Strip a page to its content. Powerful, but it
   is a content-model change, not a stylesheet — it belongs to each surface.
 - **Text-to-speech.** Browsers and operating systems already do this better

@@ -1,4 +1,6 @@
-# The eight axes
+# The axes
+
+## The stable set
 
 The canonical set of viewing preferences for every Shard and BRAINS surface.
 Each is a `data-*` attribute on `<html>`; each has a default that renders as
@@ -18,7 +20,7 @@ the stock appearance, so an absent attribute is always safe.
 | Motion | `data-motion` | `full` · `reduced` | `full` | Zeroes animation and transition durations |
 | Decorative images | `data-decoration` | `shown` · `hidden` | `shown` | Hides elements marked `data-decorative` |
 
-### Beta axes — behind the opt-in
+## Beta axes — behind the opt-in
 
 | Axis | Attribute | Values | Default |
 |---|---|---|---|

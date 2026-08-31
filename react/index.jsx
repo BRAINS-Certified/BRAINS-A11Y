@@ -22,6 +22,7 @@ import {
   AXES, DEFAULTS, LABELS, read, apply, update, subscribe,
 } from '../core/index.mjs';
 import { nextIndex, HANDLED_KEYS } from '../core/keyboard.mjs';
+import { ICONS, ICON_ATTRS, AXIS_ICONS } from '../core/icons.mjs';
 
 const PreferencesContext = createContext(null);
 
@@ -72,6 +73,77 @@ export function useA11y() {
  * @param {string[]} [props.axes] subset of axes to show, in order
  * @param {string}   [props.title]
  */
+/**
+ * One icon from the set, inline so it inherits colour from the text beside it.
+ * @param {{name: string, size?: number}} props
+ */
+export function Icon({ name, size = 20 }) {
+  const parts = ICONS[name];
+  if (!parts) return null;
+  return (
+    <svg width={size} height={size} aria-hidden="true" {...ICON_ATTRS}>
+      {parts.map((part, i) => (part.c === 'circle'
+        ? <circle key={i} cx={part.cx} cy={part.cy} r={part.r} />
+        : <path key={i} d={part.p} />))}
+    </svg>
+  );
+}
+
+/**
+ * The control that opens the panel.
+ *
+ * Presets a site owner picks between, all tunable through the CSS custom
+ * properties documented in tokens/trigger.css:
+ *
+ *   variant   'icon' | 'label' | 'pill' | 'fab'      default 'label'
+ *   placement 'inline' | 'fixed-top-right' | 'fixed-top-left'
+ *             | 'fixed-bottom-right' | 'fixed-bottom-left'   default 'inline'
+ *
+ * 'label' is the default on purpose. An icon alone is only obvious to people
+ * who already know the convention, which is the wrong assumption for a control
+ * whose whole audience is people the page has not served well so far.
+ */
+export function A11yTrigger({
+  variant = 'label',
+  placement = 'inline',
+  label = 'Accessibility',
+  onClick,
+  expanded,
+  controls,
+  children,
+}) {
+  const showLabel = variant === 'label' || variant === 'pill';
+  return (
+    <button
+      type="button"
+      className="a11y-trigger"
+      data-variant={variant}
+      data-placement={placement}
+      aria-label={showLabel ? undefined : label}
+      aria-expanded={expanded === undefined ? undefined : expanded}
+      aria-controls={controls}
+      aria-haspopup="dialog"
+      onClick={onClick}
+    >
+      <Icon name="accessibility" size={variant === 'fab' ? 24 : 20} />
+      {showLabel && <span>{children ?? label}</span>}
+    </button>
+  );
+}
+
+/**
+ * A small mark a site can show to say which standard it follows. Optional, and
+ * deliberately quiet — it states a fact, it does not claim conformance.
+ */
+export function A11yMark({ href = 'https://github.com/BRAINS-Certified/brains-a11y' }) {
+  return (
+    <a className="a11y-mark" href={href} rel="noopener">
+      <Icon name="accessibility" size={16} />
+      <span>Accessibility preferences by BRAINS</span>
+    </a>
+  );
+}
+
 export function A11yPanel({ axes, title = 'Viewing preferences' }) {
   const { prefs, set, reset } = useA11y();
   const shown = axes && axes.length ? axes : Object.keys(AXES);
@@ -87,7 +159,10 @@ export function A11yPanel({ axes, title = 'Viewing preferences' }) {
 
       {shown.map((axis) => (
         <fieldset key={axis} className="a11y-panel__axis">
-          <legend className="a11y-panel__legend">{LABELS[axis]._}</legend>
+          <legend className="a11y-panel__legend">
+            <Icon name={AXIS_ICONS[axis]} size={14} />
+            {LABELS[axis]._}
+          </legend>
           <div
             role="radiogroup"
             aria-label={LABELS[axis]._}
@@ -126,6 +201,7 @@ export function A11yPanel({ axes, title = 'Viewing preferences' }) {
       ))}
 
       <button type="button" className="a11y-panel__reset" onClick={reset}>
+        <Icon name="reset" size={14} />
         Reset to defaults
       </button>
     </div>
@@ -138,3 +214,4 @@ export function SkipLink({ href = '#main', children = 'Skip to content' }) {
 }
 
 export { AXES, DEFAULTS, LABELS };
+export { ICONS, AXIS_ICONS } from '../core/icons.mjs';
