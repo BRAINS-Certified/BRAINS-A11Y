@@ -27,7 +27,7 @@
  *   data-density       comfortable | compact
  *   data-motion        full | reduced
  *   data-contrast      default | high
- *   data-text-size     s | m | l
+ *   data-text-size     s | m | l | xl | xxl   (87.5% .. 200%)
  *   data-line-spacing  tight | standard | roomy
  *   data-reading-font  standard | hyperlegible
  *   data-accent        gold | teal | blue
