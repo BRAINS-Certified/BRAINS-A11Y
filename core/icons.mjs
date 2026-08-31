@@ -145,7 +145,28 @@ export const AXIS_ICONS = Object.freeze({
 });
 
 /**
+ * Escape text for interpolation into markup.
+ *
+ * iconSvg returns a string that callers hand to innerHTML or Astro's set:html,
+ * so anything interpolated into it is an injection point. `title` is the only
+ * caller-supplied value that reaches the output, and it was interpolated raw.
+ * @param {unknown} value
+ * @returns {string}
+ */
+function escapeMarkup(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
  * Serialise an icon to an SVG string, for renderers that want markup.
+ *
+ * `size` is coerced to a number and `title` is escaped: the result is handed
+ * to innerHTML by callers, so neither may carry markup through.
  * @param {string} name
  * @param {{size?: number, title?: string}} [options]
  * @returns {string} SVG markup, or '' for an unknown name
@@ -153,14 +174,14 @@ export const AXIS_ICONS = Object.freeze({
 export function iconSvg(name, options = {}) {
   const parts = ICONS[name];
   if (!parts) return '';
-  const size = options.size ?? 20;
+  const requested = Number(options.size ?? 20);
+  const size = Number.isFinite(requested) && requested > 0 ? requested : 20;
+  const title = options.title === undefined ? undefined : escapeMarkup(options.title);
   const attrs = Object.entries(ICON_ATTRS).map(([k, v]) => `${k}="${v}"`).join(' ');
-  const label = options.title
-    ? `<title>${options.title}</title>`
-    : ' aria-hidden="true"';
+  const label = title ? `<title>${title}</title>` : ' aria-hidden="true"';
   const body = parts.map((part) => (part.c === 'circle'
     ? `<circle cx="${part.cx}" cy="${part.cy}" r="${part.r}"/>`
     : `<path d="${part.p}"/>`)).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" ${attrs}`
-    + `${options.title ? ` role="img"` : label}>${options.title ? label : ''}${body}</svg>`;
+    + `${title ? ` role="img"` : label}>${title ? label : ''}${body}</svg>`;
 }

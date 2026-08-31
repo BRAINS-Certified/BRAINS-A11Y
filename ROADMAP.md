@@ -37,6 +37,13 @@ Roughly in the order we would take them.
 
 ### Next
 
+- **Ship as a standard component of the BRAINS Build Platform.** Add this repo
+  to the build skill so `build-init` offers it as an opt-in or opt-out module,
+  the way the AV-scan and template floor work. A new build should get the
+  accessibility layer by choosing not to remove it, rather than by remembering
+  to add it. Touches `BRAINS-build-platform` skills and the
+  `BRAINS-template-repo` standard floor. *(Raised 2026-08-31.)*
+
 - **Preference sync for signed-in viewers.** Settings live on the device today.
   A person who sets them on a laptop should not start again on their phone.
   Needs an opt-in and a clear statement that accessibility settings are

@@ -201,3 +201,19 @@ test('the no-flash script covers all four legacy schemes', () => {
     assert.ok(script.includes(key), `script reads ${key}`);
   }
 });
+
+test('iconSvg escapes a caller-supplied title and refuses a junk size', async () => {
+  const { iconSvg } = await import('../core/icons.mjs');
+  // The result is handed to innerHTML and Astro's set:html, so markup in the
+  // title would be an injection point.
+  const out = iconSvg('accessibility', { title: '</title><script>alert(1)</script>' });
+  assert.ok(!out.includes('<script>'), 'no raw script tag survives');
+  assert.ok(out.includes('&lt;script&gt;'), 'it is escaped, not stripped');
+  assert.match(out, /role="img"/);
+
+  for (const size of ['20"><script>x</script>', NaN, -5, undefined, {}]) {
+    const svg = iconSvg('accessibility', { size });
+    assert.ok(!svg.includes('<script>'), `size ${String(size)} cannot inject`);
+    assert.match(svg, /width="\d+(\.\d+)?"/, 'width is always numeric');
+  }
+});
