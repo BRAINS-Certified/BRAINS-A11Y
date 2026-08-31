@@ -71,3 +71,17 @@ test('the no-flash script covers all three legacy schemes and the OS theme', () 
     assert.ok(script.includes(marker), `script handles ${marker}`);
   }
 });
+
+test('the IIFE build exports every public symbol the source declares', async () => {
+  const { readFileSync } = await import('node:fs');
+  const source = readFileSync(new URL('../core/index.mjs', import.meta.url), 'utf8');
+  const bundle = readFileSync(new URL('../dist/brains-a11y.js', import.meta.url), 'utf8');
+  const declared = [...source.matchAll(/^export (?:const|function) (\w+)/gm)].map((m) => m[1]);
+  assert.ok(declared.length >= 15, 'found the exports');
+  for (const name of declared) {
+    assert.ok(
+      new RegExp(`\\b${name}\\b`).test(bundle.split('global.BrainsA11y')[1] ?? ''),
+      `${name} is exposed on the global`,
+    );
+  }
+});
