@@ -34,7 +34,7 @@
 
 ---
 
-**Eleven viewing preferences, one implementation, shared across every surface — so a person who sets up a page once finds the same controls, in the same place, behaving the same way, everywhere else.**
+**Eleven viewing preferences. One shared build. Set a page up once, and every other page of ours has the same controls, in the same place, working the same way.**
 
 > **Reliable, affirming, inclusive.** Built by neurodivergent minds, for neurodivergent people.
 
@@ -44,9 +44,9 @@ Zero dependencies. No build step required. Works in React, in Astro, and on a st
 
 ## This is not an overlay
 
-Accessibility overlays inject a widget that promises compliance and does not deliver it. Disabled users have said so repeatedly, and hundreds of practitioners have signed their names to the point. Some of those products have been sued over it.
+An overlay is a widget you bolt on. It promises to make a site compliant. It does not. Disabled users have said so for years, and hundreds of experts have signed their names to that view. Some of these products have been sued.
 
-**BRAINS A11Y** is the opposite thing, and the difference is worth being precise about:
+**BRAINS A11Y** is the opposite. Here is the difference:
 
 | An overlay | This |
 |---|---|
@@ -55,25 +55,25 @@ Accessibility overlays inject a widget that promises compliance and does not del
 | Hides the page's problems | **Exposes them** — turn text to 200% and every fixed width in your layout shows up |
 | Ships a compliance badge | Ships a contrast script that fails your build |
 
-**We do not ship a conformance badge and we will not.** A badge that claims compliance without measuring it is the same problem wearing a different hat.
+**We ship no compliance badge, and we never will.** A badge that claims what it has not measured is the same problem in a new coat.
 
 ---
 
 ## Not only for vision
 
-The universal access figure reads, to most people, as physical or visual disability. Most of these axes are about **reading, attention and sensory load** — so the trigger defaults to the **infinity loop**, the symbol the neurodivergent community chose for itself, and the label defaults to **"Display & reading"** rather than "Accessibility".
+To most people, the wheelchair-style access icon means physical or visual disability. But most of these axes are about **reading, focus and sensory load**. So the button uses the **infinity loop** by default. That is the symbol the neurodivergent community chose for itself. The button also reads **"Display & reading"**, not "Accessibility".
 
-That second choice matters more than it looks. A large share of the people these controls help do not think of themselves as disabled and will not open a menu that says they are. Someone who finds long lines hard to track is looking for reading settings.
+That second choice matters. Many people these controls help do not think of themselves as disabled. They will not open a menu that says they are. Someone who loses their place on long lines is looking for reading settings.
 
 **Puzzle-piece imagery is banned in BRAINS copy and will never appear here.**
 
-Twenty-four icons ship, in one geometric family. Six are offered for the trigger — `neurodiversity`, `accessibility`, `focus`, `sensory`, and the `brains` and `shard` marks — so a site can say what it means.
+Twenty-four icons ship in one family. Six suit the button: `neurodiversity`, `accessibility`, `focus`, `sensory`, and the `brains` and `shard` marks. Pick the one that fits your site.
 
 ---
 
 ## The eleven axes
 
-Every one has a default that renders as your stock appearance, so a page with no stored preference — or with storage blocked, or before JavaScript arrives — is always correct.
+Each one defaults to your normal look. So a page is always right: with no saved setting, with storage blocked, or before the script runs.
 
 | | Axis | Values |
 |---|---|---|
@@ -89,13 +89,13 @@ Every one has a default that renders as your stock appearance, so a page with no
 | ◌ | **Motion** | Full · Reduced |
 | ▣ | **Decorative images** | Shown · Hidden |
 
-Grouped for a panel as **Reading**, **Focus & calm**, and **Colour & contrast** — three headings that tell a reader at a glance this is not only a vision tool.
+The panel groups them as **Reading**, **Focus & calm**, and **Colour & contrast**. Three headings that show at a glance this is not just a vision tool.
 
 Three things there are unusual enough to call out.
 
-**Contrast has three settings, not two.** High contrast helps some readers and actively hurts others — photophobia, migraine and sensory sensitivity commonly call for *less* luminance, not more. Offering only "high" quietly assumes everyone's need points the same way. **Soft** goes the other way.
+**Contrast has three settings, not two.** High contrast helps some readers and hurts others. Light sensitivity, migraine and sensory needs often call for *less* brightness, not more. Offering only "high" assumes everyone needs the same thing. **Soft** goes the other way.
 
-**Text size reaches 200%,** the benchmark WCAG SC 1.4.4 sets, not a decorative maximum. Browser zoom stacks on top, so a reader who needs 400% can get there. Expect this axis to find layout bugs — that is the point.
+**Text size reaches 200%.** That is the level WCAG SC 1.4.4 asks for, not a token maximum. Browser zoom adds to it, so a reader who needs 400% can get there. Expect this to find layout bugs. That is the point.
 
 **Density is one scalar,** not a list of utility-class overrides. Add a new spacing value and it follows automatically.
 
@@ -105,7 +105,7 @@ Enable with `?a11y-beta`, `setExperimental(true)`, or `localStorage['brains.a11y
 
 **Reading guide** (ruler, focus) · **Paper tint** (warm, cool) · **OpenDyslexic**
 
-These are in beta because the evidence is genuinely unsettled, and [`docs/EVIDENCE.md`](docs/EVIDENCE.md) says so. OpenDyslexic is there because readers ask for it — not because controlled studies show a reading gain over a well-set sans-serif. They do not. Preference is a good enough reason to offer a typeface; it is not a good enough reason to call it a remedy.
+These are in beta because the evidence is unsettled. [`docs/EVIDENCE.md`](docs/EVIDENCE.md) says so plainly. OpenDyslexic is here because readers ask for it. Studies do not show it helps reading more than a well-set sans-serif. Liking a typeface is reason enough to offer it. It is not reason enough to call it a cure.
 
 ---
 
@@ -143,7 +143,7 @@ Recipes for Next.js, Astro and plain HTML: [`docs/MIGRATION.md`](docs/MIGRATION.
 | Light ground | `#F5EDD8` | `#FFFFFF` |
 | Accent, dark / light | `#FCC14D` / `#7A5500` | `#FCC14D` / `#7A5500` |
 
-BRAINS sets Atkinson Hyperlegible as the **default** body face. The most legible face should not be something a reader has to go and find.
+BRAINS uses Atkinson Hyperlegible as the **default** body face. The clearest face should not be one a reader has to hunt for.
 
 ---
 
@@ -156,9 +156,9 @@ npm run test:browser  # every axis, every value, both brands, in real Chromium
 
 `scripts/check-contrast.mjs` measures **60 colour pairs** and fails the build on any miss.
 
-It exists because an approved brand guide told us, in three separate places, to use a gold that gives "4.6:1, AA" on white. It measures **2.54:1** and fails — inside the rule that same guide called the most common accessibility bug. [`docs/CONTRAST.md`](docs/CONTRAST.md) has the full account. **A ratio written in a document is a claim. The script is the evidence.**
+It exists because our own brand guide told us, in three places, to use a gold it said gave "4.6:1, AA" on white. It measures **2.54:1**. It fails. And it failed inside the rule that guide called the most common accessibility bug. [`docs/CONTRAST.md`](docs/CONTRAST.md) tells the whole story. **A ratio in a document is a claim. The script is the proof.**
 
-`test/browser` clicks every value of every axis in both brands and asserts a real computed-style change. That exists because three axes once shipped **completely inert** — every attribute set correctly, every `aria-checked` right, and nothing moving on screen. Attribute assertions passed all three.
+`test/browser` clicks every value of every axis, in both brands, and checks the page really changed. It exists because three axes once shipped **doing nothing at all**. Each set its attribute. Each reported the right state. None moved the page. Checking attributes passed all three.
 
 ---
 
@@ -178,18 +178,18 @@ docs/      SPEC · EVIDENCE · CONTRAST · CHECKLIST · MIGRATION · CONFIGURING
 
 ## Compliance
 
-A surface is compliant when the no-flash script is inlined, `base.css` plus one brand file are loaded, **the panel is reachable from the header on every page including sign-in and error pages**, and a skip link is the first focusable element.
+A site meets the bar when four things are true. The no-flash script is inline. `base.css` and one brand file are loaded. **The panel is in the header on every page, sign-in and error pages included.** And a skip link is the first thing you can tab to.
 
-Standards this is built against: **WCAG 2.2 AA** throughout, with SC 1.4.4, 1.4.10, 1.4.12, 2.3.3, 2.5.8 and the ARIA radio-group pattern implemented explicitly. **EN 301 549** mapping — the harmonised standard behind the European Accessibility Act — is on the [roadmap](ROADMAP.md), not done.
+We build to **WCAG 2.2 AA**. SC 1.4.4, 1.4.10, 1.4.12, 2.3.3, 2.5.8 and the ARIA radio-group pattern are each built in on purpose. **EN 301 549** is the standard behind the European Accessibility Act. Mapping to it is on the [roadmap](ROADMAP.md). It is not done.
 
-[`docs/CHECKLIST.md`](docs/CHECKLIST.md) audits the package line by line against
-[The A11Y Project checklist](https://www.a11yproject.com/checklist/), and splits every item into what the
-package owns, what it helps with, and what remains yours. That audit found **five real defects** — control
-borders at 1.08:1, a selected state carried by colour alone, four buttons sharing the accessible name
-"Standard", an underline-free link, and a hardcoded heading level. All fixed; all listed.
+[`docs/CHECKLIST.md`](docs/CHECKLIST.md) checks the package against
+[The A11Y Project checklist](https://www.a11yproject.com/checklist/), item by item. It sorts each one into
+what the package owns, what it helps with, and what stays yours. That audit found **five real defects**.
+Control borders at 1.08:1. A selected state shown by colour alone. Four buttons that shared the name
+"Standard". A link with no underline. A fixed heading level. All fixed, and all listed.
 
-Adopting this package does not make a site conformant, and we will not say it does. We will say what we have
-measured, and no more than that.
+Using this package does not make a site compliant. We will not say it does. We say what we have measured, and
+nothing more.
 
 ---
 

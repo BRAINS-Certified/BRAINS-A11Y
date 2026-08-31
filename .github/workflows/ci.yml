@@ -24,11 +24,14 @@ jobs:
       - name: Verify contrast of every shipped colour pair
         run: node scripts/check-contrast.mjs
 
+      # npm test, not raw `node --test`: Node's runner treats every file under
+      # test/ as a spec, which would pull in the browser suite and fail without
+      # a browser. The package script scopes it to the unit specs.
       - name: Test
-        run: node --test
+        run: npm test
 
-      - name: Build the IIFE bundle
-        run: node scripts/build-iife.mjs
+      - name: Build the bundle and the icons
+        run: npm run build
 
-      - name: Fail if the committed bundle is stale
-        run: git diff --exit-code dist/
+      - name: Fail if the committed bundle or icons are stale
+        run: git diff --exit-code dist/ assets/icons/
