@@ -23,7 +23,7 @@
 /** @typedef {'comfortable'|'compact'} Density */
 /** @typedef {'full'|'reduced'} Motion */
 /** @typedef {'default'|'high'} Contrast */
-/** @typedef {'s'|'m'|'l'} TextSize */
+/** @typedef {'s'|'m'|'l'|'xl'|'xxl'} TextSize */
 /** @typedef {'tight'|'standard'|'roomy'} LineSpacing */
 /** @typedef {'standard'|'hyperlegible'} ReadingFont */
 /** @typedef {'gold'|'teal'|'blue'} Accent */
@@ -74,7 +74,7 @@ export const AXES = /** @type {const} */ ({
   density: ['comfortable', 'compact'],
   motion: ['full', 'reduced'],
   contrast: ['default', 'high'],
-  textSize: ['m', 's', 'l'],
+  textSize: ['m', 's', 'l', 'xl', 'xxl'],
   lineSpacing: ['standard', 'tight', 'roomy'],
   readingFont: ['standard', 'hyperlegible'],
   accent: ['gold', 'teal', 'blue'],
@@ -273,7 +273,10 @@ export const LABELS = Object.freeze({
   density: { _: 'Density', comfortable: 'Comfortable', compact: 'Compact' },
   motion: { _: 'Motion', full: 'Full', reduced: 'Reduced' },
   contrast: { _: 'Contrast', default: 'Default', high: 'High' },
-  textSize: { _: 'Text size', s: 'Small', m: 'Default', l: 'Large' },
+  textSize: {
+    _: 'Text size',
+    s: 'Small', m: 'Default', l: 'Large', xl: 'Larger', xxl: 'Largest',
+  },
   lineSpacing: { _: 'Line spacing', tight: 'Tight', standard: 'Standard', roomy: 'Roomy' },
   readingFont: { _: 'Reading font', standard: 'Standard', hyperlegible: 'Hyperlegible' },
   accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },

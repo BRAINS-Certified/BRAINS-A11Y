@@ -25,7 +25,7 @@
 /** @typedef {'comfortable'|'compact'} Density */
 /** @typedef {'full'|'reduced'} Motion */
 /** @typedef {'default'|'high'} Contrast */
-/** @typedef {'s'|'m'|'l'} TextSize */
+/** @typedef {'s'|'m'|'l'|'xl'|'xxl'} TextSize */
 /** @typedef {'tight'|'standard'|'roomy'} LineSpacing */
 /** @typedef {'standard'|'hyperlegible'} ReadingFont */
 /** @typedef {'gold'|'teal'|'blue'} Accent */
@@ -76,7 +76,7 @@ const AXES = /** @type {const} */ ({
   density: ['comfortable', 'compact'],
   motion: ['full', 'reduced'],
   contrast: ['default', 'high'],
-  textSize: ['m', 's', 'l'],
+  textSize: ['m', 's', 'l', 'xl', 'xxl'],
   lineSpacing: ['standard', 'tight', 'roomy'],
   readingFont: ['standard', 'hyperlegible'],
   accent: ['gold', 'teal', 'blue'],
@@ -275,7 +275,10 @@ const LABELS = Object.freeze({
   density: { _: 'Density', comfortable: 'Comfortable', compact: 'Compact' },
   motion: { _: 'Motion', full: 'Full', reduced: 'Reduced' },
   contrast: { _: 'Contrast', default: 'Default', high: 'High' },
-  textSize: { _: 'Text size', s: 'Small', m: 'Default', l: 'Large' },
+  textSize: {
+    _: 'Text size',
+    s: 'Small', m: 'Default', l: 'Large', xl: 'Larger', xxl: 'Largest',
+  },
   lineSpacing: { _: 'Line spacing', tight: 'Tight', standard: 'Standard', roomy: 'Roomy' },
   readingFont: { _: 'Reading font', standard: 'Standard', hyperlegible: 'Hyperlegible' },
   accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },
@@ -301,5 +304,66 @@ function parse(/** @type {string|null} */ raw) {
   }
 }
 
-  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS };
+
+/**
+ * brains-a11y — radiogroup keyboard behaviour.
+ *
+ * `role="radiogroup"` with `role="radio"` children is a promise: arrow keys
+ * move between options, Home and End jump to the ends, and only one option is
+ * in the tab order so Tab leaves the group rather than walking through every
+ * value. The panels shipped without any of it — every option was tabbable and
+ * the arrow keys did nothing, which is worse than plain buttons because a
+ * screen reader announces a contract the page does not honour.
+ *
+ * The index arithmetic lives here so the React and Astro panels cannot drift
+ * from each other, and so it can be tested without a DOM.
+ */
+
+/**
+ * Where a key press should move focus within a radiogroup.
+ *
+ * @param {string} key       KeyboardEvent.key
+ * @param {number} current   index of the currently focused option
+ * @param {number} length    number of options
+ * @param {boolean} [rtl]    true when the group reads right-to-left
+ * @returns {number} the destination index, or -1 to leave the event alone
+ */
+function nextIndex(key, current, length, rtl = false) {
+  if (length < 1) return -1;
+  const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
+  const back = rtl ? 'ArrowRight' : 'ArrowLeft';
+
+  switch (key) {
+    case forward:
+    case 'ArrowDown':
+      return (current + 1) % length;
+    case back:
+    case 'ArrowUp':
+      return (current - 1 + length) % length;
+    case 'Home':
+      return 0;
+    case 'End':
+      return length - 1;
+    default:
+      return -1;
+  }
+}
+
+/** Keys this module consumes; a caller should preventDefault on these. */
+const HANDLED_KEYS = Object.freeze([
+  'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End',
+]);
+
+/**
+ * Roving tabindex: the selected option is the group's single tab stop.
+ * @param {ArrayLike<HTMLElement>} options
+ * @param {number} selected
+ */
+function applyRovingTabindex(options, selected) {
+  for (let i = 0; i < options.length; i++) {
+    options[i].tabIndex = i === selected ? 0 : -1;
+  }
+}
+
+  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS, nextIndex, HANDLED_KEYS, applyRovingTabindex };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

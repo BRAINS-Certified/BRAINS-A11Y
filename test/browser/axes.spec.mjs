@@ -111,5 +111,38 @@ if (errors.length) {
   for (const e of [...new Set(errors)]) console.log('    ' + e);
 }
 
+/* ── Reflow: SC 1.4.10 says no horizontal scrolling at a 320px viewport.
+ *    Checked at the largest text size, which is where it actually bites. ── */
+await page.setViewportSize({ width: 320, height: 640 });
+await page.click('#panelwrap-shard [data-axis="textSize"][data-value="xxl"]');
+await page.waitForTimeout(120);
+const overflow = await page.evaluate(() =>
+  document.documentElement.scrollWidth - document.documentElement.clientWidth);
+const reflowOk = overflow <= 1;
+console.log(`\n  Reflow at 320px \u00d7 200% text: ${reflowOk ? 'PASS' : 'FAIL'} (overflow ${overflow}px)`);
+if (!reflowOk) failures.push(`reflow: ${overflow}px horizontal overflow`);
+
+/* ── Keyboard: role="radiogroup" promises arrow keys and one tab stop. ── */
+await page.setViewportSize({ width: 1280, height: 900 });
+await page.click('#panelwrap-shard [data-axis="accent"][data-value="gold"]');
+await page.waitForTimeout(80);
+const tabStops = await page.$$eval(
+  '#panelwrap-shard [data-axis="accent"]',
+  (els) => els.filter((e) => e.tabIndex === 0).length);
+await page.focus('#panelwrap-shard [data-axis="accent"][data-value="gold"]');
+await page.keyboard.press('ArrowRight');
+await page.waitForTimeout(80);
+const afterArrow = await page.getAttribute('#scope-shard', 'data-accent');
+await page.keyboard.press('End');
+await page.waitForTimeout(80);
+const afterEnd = await page.getAttribute('#scope-shard', 'data-accent');
+
+const kbOk = tabStops === 1 && afterArrow === 'teal' && afterEnd === 'blue';
+console.log(`  Radiogroup keyboard:            ${kbOk ? 'PASS' : 'FAIL'}` +
+  ` (tab stops ${tabStops}, ArrowRight -> ${afterArrow}, End -> ${afterEnd})`);
+if (!kbOk) failures.push('radiogroup keyboard contract');
+
+console.log(`\n  ${failures.length === 0 ? 'ALL CHECKS PASS' : failures.length + ' FAILING'}`);
+
 await browser.close();
 process.exit(failures.length === 0 && errors.length === 0 ? 0 : 1);

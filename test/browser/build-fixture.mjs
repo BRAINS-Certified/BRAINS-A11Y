@@ -84,13 +84,26 @@ ${surface('brains')}
         });
         buttons.push(b); group.appendChild(b);
       });
+      group.addEventListener('keydown', function (event) {
+        if (A.HANDLED_KEYS.indexOf(event.key) === -1) return;
+        var opts = A.AXES[axis];
+        var to = A.nextIndex(event.key, opts.indexOf(prefs[axis]), opts.length);
+        if (to < 0) return;
+        event.preventDefault();
+        prefs[axis] = opts[to];
+        A.apply(prefs, target);
+        paint();
+        group.children[to].focus();
+      });
       panel.appendChild(group);
     });
     function paint() {
       buttons.forEach(function (b) {
-        var on = prefs[b.getAttribute('data-axis')] === b.getAttribute('data-value');
+        var ax = b.getAttribute('data-axis');
+        var on = prefs[ax] === b.getAttribute('data-value');
         b.setAttribute('aria-checked', String(on));
         if (on) b.setAttribute('data-active', ''); else b.removeAttribute('data-active');
+        b.tabIndex = on ? 0 : -1;
       });
     }
     host.appendChild(panel); A.apply(prefs, target); paint();

@@ -65,11 +65,21 @@
 }
 
 /* ── Text size ──────────────────────────────────────────────────────────────
- * Scales the root font size so every rem-based measurement follows. Small is
- * -10%, large +15%, matching the approved control set. */
-[data-text-size='s'] { --a11y-text-scale: 0.9; }
-[data-text-size='m'] { --a11y-text-scale: 1; }
-[data-text-size='l'] { --a11y-text-scale: 1.15; }
+ * Scales the root font size, so every rem-based measurement follows.
+ *
+ * The top of the scale is 200%, which is the benchmark WCAG 2.2 SC 1.4.4
+ * (Resize Text) sets. It is not a decorative maximum: a person with low vision
+ * may genuinely work at it all day. Browser zoom stacks on top of this, so a
+ * viewer who needs 400% can reach it by combining the two.
+ *
+ * A layout that survives 200% here also satisfies SC 1.4.10 (Reflow) — no
+ * horizontal scrolling at a 320px viewport — so this axis is the cheapest way
+ * to find out whether a surface is genuinely usable or merely passes an audit. */
+[data-text-size='s']   { --a11y-text-scale: 0.875; }  /*  87.5% */
+[data-text-size='m']   { --a11y-text-scale: 1; }      /* 100%   */
+[data-text-size='l']   { --a11y-text-scale: 1.25; }   /* 125%   */
+[data-text-size='xl']  { --a11y-text-scale: 1.6; }    /* 160%   */
+[data-text-size='xxl'] { --a11y-text-scale: 2; }      /* 200% — SC 1.4.4 */
 
 html,
 [data-a11y-scope] { font-size: calc(100% * var(--a11y-text-scale)); }
@@ -139,6 +149,42 @@ body,
 }
 [data-contrast='high'] :focus-visible {
   outline-width: 3px;
+}
+
+/* ── Operating-system signals ───────────────────────────────────────────────
+ * A person who has already told their OS what they need should not have to
+ * tell every website as well. These apply automatically; the explicit controls
+ * remain available to go further. */
+
+/* Windows High Contrast Mode and similar forced palettes. The browser replaces
+ * our colours wholesale, which flattens any state we signalled with background
+ * alone — so the selected option is re-stated in system colours that survive. */
+@media (forced-colors: active) {
+  .a11y-panel__option[data-active] {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .a11y-panel__option { border-color: ButtonBorder; }
+  :focus-visible { outline-color: Highlight; }
+  .a11y-skip-link { background: Highlight; color: HighlightText; }
+}
+
+/* The OS asked for more contrast. Same treatment as data-contrast="high". */
+@media (prefers-contrast: more) {
+  :root {
+    --ink-muted: var(--ink-muted-high, var(--ink));
+    --line: var(--line-high, currentColor);
+  }
+}
+
+/* The OS asked for less transparency — brand files may opt in by defining
+ * --line-opaque and --overlay-bg-opaque. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --line: var(--line-opaque, var(--line));
+    --overlay-bg: var(--overlay-bg-opaque, var(--overlay-bg));
+  }
 }
 
 /* ── Focus, always ──────────────────────────────────────────────────────────
@@ -343,6 +389,7 @@ body,
 
 .a11y-panel {
   display: flex;
+  container-type: inline-size;
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-4);
@@ -376,7 +423,14 @@ body,
   padding: 0;
 }
 
-.a11y-panel__options { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--space-2); }
+/* Wraps rather than overflowing. Five options at 200% text in a 320px viewport
+ * would otherwise force horizontal scrolling and fail SC 1.4.10 (Reflow) — in
+ * the control panel whose whole job is to prevent that. */
+.a11y-panel__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.5em, 1fr));
+  gap: var(--space-2);
+}
 
 .a11y-panel__option,
 .a11y-panel__reset {
@@ -471,7 +525,7 @@ body,
 /** @typedef {'comfortable'|'compact'} Density */
 /** @typedef {'full'|'reduced'} Motion */
 /** @typedef {'default'|'high'} Contrast */
-/** @typedef {'s'|'m'|'l'} TextSize */
+/** @typedef {'s'|'m'|'l'|'xl'|'xxl'} TextSize */
 /** @typedef {'tight'|'standard'|'roomy'} LineSpacing */
 /** @typedef {'standard'|'hyperlegible'} ReadingFont */
 /** @typedef {'gold'|'teal'|'blue'} Accent */
@@ -522,7 +576,7 @@ const AXES = /** @type {const} */ ({
   density: ['comfortable', 'compact'],
   motion: ['full', 'reduced'],
   contrast: ['default', 'high'],
-  textSize: ['m', 's', 'l'],
+  textSize: ['m', 's', 'l', 'xl', 'xxl'],
   lineSpacing: ['standard', 'tight', 'roomy'],
   readingFont: ['standard', 'hyperlegible'],
   accent: ['gold', 'teal', 'blue'],
@@ -721,7 +775,10 @@ const LABELS = Object.freeze({
   density: { _: 'Density', comfortable: 'Comfortable', compact: 'Compact' },
   motion: { _: 'Motion', full: 'Full', reduced: 'Reduced' },
   contrast: { _: 'Contrast', default: 'Default', high: 'High' },
-  textSize: { _: 'Text size', s: 'Small', m: 'Default', l: 'Large' },
+  textSize: {
+    _: 'Text size',
+    s: 'Small', m: 'Default', l: 'Large', xl: 'Larger', xxl: 'Largest',
+  },
   lineSpacing: { _: 'Line spacing', tight: 'Tight', standard: 'Standard', roomy: 'Roomy' },
   readingFont: { _: 'Reading font', standard: 'Standard', hyperlegible: 'Hyperlegible' },
   accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },
@@ -747,7 +804,68 @@ function parse(/** @type {string|null} */ raw) {
   }
 }
 
-  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS };
+
+/**
+ * brains-a11y — radiogroup keyboard behaviour.
+ *
+ * `role="radiogroup"` with `role="radio"` children is a promise: arrow keys
+ * move between options, Home and End jump to the ends, and only one option is
+ * in the tab order so Tab leaves the group rather than walking through every
+ * value. The panels shipped without any of it — every option was tabbable and
+ * the arrow keys did nothing, which is worse than plain buttons because a
+ * screen reader announces a contract the page does not honour.
+ *
+ * The index arithmetic lives here so the React and Astro panels cannot drift
+ * from each other, and so it can be tested without a DOM.
+ */
+
+/**
+ * Where a key press should move focus within a radiogroup.
+ *
+ * @param {string} key       KeyboardEvent.key
+ * @param {number} current   index of the currently focused option
+ * @param {number} length    number of options
+ * @param {boolean} [rtl]    true when the group reads right-to-left
+ * @returns {number} the destination index, or -1 to leave the event alone
+ */
+function nextIndex(key, current, length, rtl = false) {
+  if (length < 1) return -1;
+  const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
+  const back = rtl ? 'ArrowRight' : 'ArrowLeft';
+
+  switch (key) {
+    case forward:
+    case 'ArrowDown':
+      return (current + 1) % length;
+    case back:
+    case 'ArrowUp':
+      return (current - 1 + length) % length;
+    case 'Home':
+      return 0;
+    case 'End':
+      return length - 1;
+    default:
+      return -1;
+  }
+}
+
+/** Keys this module consumes; a caller should preventDefault on these. */
+const HANDLED_KEYS = Object.freeze([
+  'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End',
+]);
+
+/**
+ * Roving tabindex: the selected option is the group's single tab stop.
+ * @param {ArrayLike<HTMLElement>} options
+ * @param {number} selected
+ */
+function applyRovingTabindex(options, selected) {
+  for (let i = 0; i < options.length; i++) {
+    options[i].tabIndex = i === selected ? 0 : -1;
+  }
+}
+
+  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS, nextIndex, HANDLED_KEYS, applyRovingTabindex };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
 <script>
@@ -778,13 +896,26 @@ function parse(/** @type {string|null} */ raw) {
         });
         buttons.push(b); group.appendChild(b);
       });
+      group.addEventListener('keydown', function (event) {
+        if (A.HANDLED_KEYS.indexOf(event.key) === -1) return;
+        var opts = A.AXES[axis];
+        var to = A.nextIndex(event.key, opts.indexOf(prefs[axis]), opts.length);
+        if (to < 0) return;
+        event.preventDefault();
+        prefs[axis] = opts[to];
+        A.apply(prefs, target);
+        paint();
+        group.children[to].focus();
+      });
       panel.appendChild(group);
     });
     function paint() {
       buttons.forEach(function (b) {
-        var on = prefs[b.getAttribute('data-axis')] === b.getAttribute('data-value');
+        var ax = b.getAttribute('data-axis');
+        var on = prefs[ax] === b.getAttribute('data-value');
         b.setAttribute('aria-checked', String(on));
         if (on) b.setAttribute('data-active', ''); else b.removeAttribute('data-active');
+        b.tabIndex = on ? 0 : -1;
       });
     }
     host.appendChild(panel); A.apply(prefs, target); paint();
