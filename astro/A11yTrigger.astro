@@ -6,7 +6,8 @@
  *   variant   'icon' | 'label' | 'pill' | 'fab'                     default 'label'
  *   placement 'inline' | 'fixed-top-right' | 'fixed-top-left'
  *             | 'fixed-bottom-right' | 'fixed-bottom-left'          default 'inline'
- *   label     accessible name and visible text                      default 'Accessibility'
+ *   icon      any name from TRIGGER_ICONS                           default 'neurodiversity'
+ *   label     accessible name and visible text                      default 'Display & reading'
  *   controls  id of the panel it opens
  *
  * Every colour, radius, size and offset is a CSS custom property — see the
@@ -17,12 +18,13 @@ import { iconSvg } from '../core/icons.mjs';
 const {
   variant = 'label',
   placement = 'inline',
-  label = 'Accessibility',
+  icon = 'neurodiversity',
+  label = 'Display & reading',
   controls,
 } = Astro.props;
 
 const showLabel = variant === 'label' || variant === 'pill';
-const icon = iconSvg('accessibility', { size: variant === 'fab' ? 24 : 20 });
+const iconMarkup = iconSvg(icon, { size: variant === 'fab' ? 24 : 20 });
 ---
 <button
   type="button"
@@ -34,7 +36,7 @@ const icon = iconSvg('accessibility', { size: variant === 'fab' ? 24 : 20 });
   aria-haspopup="dialog"
   aria-expanded="false"
   aria-controls={controls}
-><Fragment set:html={icon} />{showLabel && <span>{label}</span>}</button>
+><Fragment set:html={iconMarkup} />{showLabel && <span>{label}</span>}</button>
 
 <script>
   // Toggles the popover named by aria-controls, closes on Escape and on an

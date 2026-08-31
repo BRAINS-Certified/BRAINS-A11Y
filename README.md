@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 -->
 <div align="center">
 
-<img src="assets/icons/a11y-accessibility.svg" alt="" width="72">
+<img src="assets/icons/a11y-neurodiversity.svg" alt="" width="72">
 
 # brains-a11y
 
@@ -48,6 +48,18 @@ Accessibility overlays inject a widget that promises compliance and does not del
 
 ---
 
+## Not only for vision
+
+The universal access figure reads, to most people, as physical or visual disability. Most of these axes are about **reading, attention and sensory load** — so the trigger defaults to the **infinity loop**, the symbol the neurodivergent community chose for itself, and the label defaults to **"Display & reading"** rather than "Accessibility".
+
+That second choice matters more than it looks. A large share of the people these controls help do not think of themselves as disabled and will not open a menu that says they are. Someone who finds long lines hard to track is looking for reading settings.
+
+**Puzzle-piece imagery is banned in BRAINS copy and will never appear here.**
+
+Twenty-four icons ship, in one geometric family. Six are offered for the trigger — `neurodiversity`, `accessibility`, `focus`, `sensory`, and the `brains` and `shard` marks — so a site can say what it means.
+
+---
+
 ## The eleven axes
 
 Every one has a default that renders as your stock appearance, so a page with no stored preference — or with storage blocked, or before JavaScript arrives — is always correct.
@@ -65,6 +77,8 @@ Every one has a default that renders as your stock appearance, so a page with no
 | **Aa** | **Reading font** | Standard · Atkinson Hyperlegible |
 | ◌ | **Motion** | Full · Reduced |
 | ▣ | **Decorative images** | Shown · Hidden |
+
+Grouped for a panel as **Reading**, **Focus & calm**, and **Colour & contrast** — three headings that tell a reader at a glance this is not only a vision tool.
 
 Three things there are unusual enough to call out.
 

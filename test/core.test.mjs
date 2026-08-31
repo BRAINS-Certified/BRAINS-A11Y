@@ -160,3 +160,22 @@ test('the IIFE bundle carries every dependency-free core module', async () => {
     assert.ok(new RegExp(`\\b${name}\\b`).test(surface), `${name} is on the global`);
   }
 });
+
+test('every axis belongs to exactly one panel group', async () => {
+  const { GROUPS } = await import('../core/index.mjs');
+  const grouped = GROUPS.flatMap((g) => g.axes);
+  assert.equal(new Set(grouped).size, grouped.length, 'no axis is listed twice');
+  for (const axis of Object.keys(DEFAULTS)) {
+    assert.ok(grouped.includes(axis), `${axis} is in a group`);
+  }
+  for (const axis of grouped) {
+    assert.ok(axis in DEFAULTS, `${axis} is a real axis`);
+  }
+});
+
+test('every trigger icon and group icon exists in the set', async () => {
+  const { TRIGGER_ICONS, ICONS, GROUPS, AXIS_ICONS } = await import('../core/icons.mjs')
+    .then(async (icons) => ({ ...icons, GROUPS: (await import('../core/index.mjs')).GROUPS }));
+  for (const name of TRIGGER_ICONS) assert.ok(ICONS[name], `trigger icon ${name}`);
+  for (const group of GROUPS) assert.ok(ICONS[group.icon] || AXIS_ICONS[group.icon], `group icon ${group.icon}`);
+});

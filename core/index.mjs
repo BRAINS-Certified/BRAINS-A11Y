@@ -362,6 +362,20 @@ export function subscribe(handler) {
   };
 }
 
+/**
+ * Suggested grouping for a panel, in order. Naming the groups is the cheapest
+ * way to show a reader that this is not only a vision tool: most people arrive
+ * looking for one of these four things, not for "accessibility".
+ */
+export const GROUPS = Object.freeze([
+  { id: 'reading', label: 'Reading', icon: 'readingFont',
+    axes: ['textSize', 'lineSpacing', 'textSpacing', 'measure', 'readingFont'] },
+  { id: 'focus', label: 'Focus & calm', icon: 'focus',
+    axes: ['motion', 'decoration', 'density', 'readingGuide'] },
+  { id: 'sight', label: 'Colour & contrast', icon: 'contrast',
+    axes: ['theme', 'contrast', 'accent', 'tint'] },
+]);
+
 /** Human-readable labels for building a control panel. */
 export const LABELS = Object.freeze({
   theme: { _: 'Theme', midnight: 'Midnight', bone: 'Bone' },

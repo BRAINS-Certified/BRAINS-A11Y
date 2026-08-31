@@ -98,15 +98,29 @@ export function Icon({ name, size = 20 }) {
  *   variant   'icon' | 'label' | 'pill' | 'fab'      default 'label'
  *   placement 'inline' | 'fixed-top-right' | 'fixed-top-left'
  *             | 'fixed-bottom-right' | 'fixed-bottom-left'   default 'inline'
+ *   icon      any name from TRIGGER_ICONS               default 'neurodiversity'
+ *   label     visible text and accessible name          default 'Display & reading'
  *
- * 'label' is the default on purpose. An icon alone is only obvious to people
- * who already know the convention, which is the wrong assumption for a control
- * whose whole audience is people the page has not served well so far.
+ * Three defaults are deliberate.
+ *
+ * 'label', because an icon alone is only obvious to people who already know the
+ * convention — the wrong assumption for a control whose audience is people the
+ * page has not served well so far.
+ *
+ * 'neurodiversity' rather than the universal access figure, because that figure
+ * reads as physical or visual disability to most people, and most of these axes
+ * are about reading, attention and sensory load. The infinity loop is the symbol
+ * the neurodivergent community chose for itself.
+ *
+ * 'Display & reading' rather than 'Accessibility', because a large share of the
+ * people these controls help do not think of themselves as disabled and will
+ * not open a menu that says they are.
  */
 export function A11yTrigger({
   variant = 'label',
   placement = 'inline',
-  label = 'Accessibility',
+  icon = 'neurodiversity',
+  label = 'Display & reading',
   onClick,
   expanded,
   controls,
@@ -125,7 +139,7 @@ export function A11yTrigger({
       aria-haspopup="dialog"
       onClick={onClick}
     >
-      <Icon name="accessibility" size={variant === 'fab' ? 24 : 20} />
+      <Icon name={icon} size={variant === 'fab' ? 24 : 20} />
       {showLabel && <span>{children ?? label}</span>}
     </button>
   );

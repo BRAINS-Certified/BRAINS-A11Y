@@ -364,6 +364,20 @@ function subscribe(handler) {
   };
 }
 
+/**
+ * Suggested grouping for a panel, in order. Naming the groups is the cheapest
+ * way to show a reader that this is not only a vision tool: most people arrive
+ * looking for one of these four things, not for "accessibility".
+ */
+const GROUPS = Object.freeze([
+  { id: 'reading', label: 'Reading', icon: 'readingFont',
+    axes: ['textSize', 'lineSpacing', 'textSpacing', 'measure', 'readingFont'] },
+  { id: 'focus', label: 'Focus & calm', icon: 'focus',
+    axes: ['motion', 'decoration', 'density', 'readingGuide'] },
+  { id: 'sight', label: 'Colour & contrast', icon: 'contrast',
+    axes: ['theme', 'contrast', 'accent', 'tint'] },
+]);
+
 /** Human-readable labels for building a control panel. */
 const LABELS = Object.freeze({
   theme: { _: 'Theme', midnight: 'Midnight', bone: 'Bone' },
@@ -539,6 +553,57 @@ const ICONS = Object.freeze({
   tint:         [{ p: 'M12 3.4 7.1 9.3a6.4 6.4 0 1 0 9.8 0z' },
                  { p: 'M8.2 14.6a4.2 4.2 0 0 0 7.6 0' }],
 
+  /* ── Identity ────────────────────────────────────────────────────────────
+   * The universal access figure reads, to most people, as physical or visual
+   * disability. That is a poor fit for a tool whose axes are mostly about
+   * reading, attention and sensory load, so the trigger icon is a choice.
+   *
+   * `neurodiversity` is the infinity loop — the symbol the neurodivergent
+   * community chose for itself, and in gold the one autistic self-advocates
+   * adopted specifically to displace the puzzle piece. Puzzle-piece imagery is
+   * banned in BRAINS copy for that reason and will never appear here. */
+  neurodiversity: [
+    { p: 'M8.5 8.3a3.7 3.7 0 1 0 0 7.4c2.5 0 3.3-2 3.5-3.7.2-1.7 1-3.7 3.5-3.7a3.7 3.7 0 1 1 0 7.4c-2.5 0-3.3-2-3.5-3.7-.2-1.7-1-3.7-3.5-3.7z' },
+  ],
+
+  /* Attention and focus — a viewfinder, not a target. Nobody is being aimed at. */
+  focus: [
+    { p: 'M4 8.6V5.7A1.7 1.7 0 0 1 5.7 4h2.9' },
+    { p: 'M15.4 4h2.9A1.7 1.7 0 0 1 20 5.7v2.9' },
+    { p: 'M20 15.4v2.9a1.7 1.7 0 0 1-1.7 1.7h-2.9' },
+    { p: 'M8.6 20H5.7A1.7 1.7 0 0 1 4 18.3v-2.9' },
+    { c: 'circle', cx: 12, cy: 12, r: 2.7 },
+  ],
+
+  /* Sensory load — intensity coming down, drawn as a falling meter rather than
+   * an ear or a brain. Both of those name a body part; this names the setting. */
+  sensory: [
+    { p: 'M4 11.4v1.2' },
+    { p: 'M8 8.2v7.6' },
+    { p: 'M12 5.6v12.8' },
+    { p: 'M16 9.4v5.2' },
+    { p: 'M20 11.2v1.6' },
+  ],
+
+  /* ── Brand marks, for a trigger that should read as ours ────────────────── */
+
+  /* BRAINS — the continuous C of human cognition beside the networked nodes of
+   * machine intelligence, simplified to the icon grid. */
+  brains: [
+    { p: 'M14.8 5.4a7.4 7.4 0 1 0 0 13.2' },
+    { c: 'circle', cx: 17.6, cy: 7.6, r: 1.5 },
+    { c: 'circle', cx: 20.2, cy: 12, r: 1.5 },
+    { c: 'circle', cx: 17.6, cy: 16.4, r: 1.5 },
+    { p: 'M18.4 8.9 19.4 10.7M19.4 13.3 18.4 15.1' },
+  ],
+
+  /* Shard — the faceted diamond, on the 24-grid. */
+  shard: [
+    { p: 'M12 3 20 12 12 21 4 12z' },
+    { p: 'M12 3v18' },
+    { p: 'M4 12 12 9.2 20 12' },
+  ],
+
   /* Panel furniture */
   reset:        [{ p: 'M3.6 12a8.4 8.4 0 1 0 2.6-6.1' }, { p: 'M3.4 4.2v4.6h4.6' }],
   close:        [{ p: 'M6.2 6.2 17.8 17.8M17.8 6.2 6.2 17.8' }],
@@ -547,6 +612,14 @@ const ICONS = Object.freeze({
   beaker:       [{ p: 'M9.4 3.4v5.2L4.6 17.4a1.8 1.8 0 0 0 1.6 2.8h11.6a1.8 1.8 0 0 0 1.6-2.8L14.6 8.6V3.4' },
                  { p: 'M8.2 3.4h7.6' }, { p: 'M7.2 14.6h9.6' }],
 });
+
+/**
+ * Icons offered for the trigger button. A site picks the one that tells its
+ * visitors the truth about what the control does.
+ */
+const TRIGGER_ICONS = Object.freeze([
+  'accessibility', 'neurodiversity', 'focus', 'sensory', 'brains', 'shard',
+]);
 
 /** Every axis maps to an icon; the panel needs no lookup table of its own. */
 const AXIS_ICONS = Object.freeze({
@@ -577,5 +650,5 @@ function iconSvg(name, options = {}) {
     + `${options.title ? ` role="img"` : label}>${options.title ? label : ''}${body}</svg>`;
 }
 
-  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, EXPERIMENTAL_AXES, EXPERIMENTAL_VALUES, EXPERIMENTAL_STORAGE_KEY, isExperimentalEnabled, setExperimental, resolveAxes, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS, nextIndex, HANDLED_KEYS, applyRovingTabindex, ICON_ATTRS, ICONS, AXIS_ICONS, iconSvg };
+  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, EXPERIMENTAL_AXES, EXPERIMENTAL_VALUES, EXPERIMENTAL_STORAGE_KEY, isExperimentalEnabled, setExperimental, resolveAxes, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, GROUPS, LABELS, nextIndex, HANDLED_KEYS, applyRovingTabindex, ICON_ATTRS, ICONS, TRIGGER_ICONS, AXIS_ICONS, iconSvg };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

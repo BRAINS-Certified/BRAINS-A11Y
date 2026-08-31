@@ -4,6 +4,54 @@ The panel is the same everywhere; the button that opens it is not. A site owner
 picks a preset and, if they want, tunes it with custom properties. Nothing here
 requires forking the package.
 
+## Which icon, and what to call it
+
+Two defaults here are deliberate, and both are about who feels invited.
+
+**The icon defaults to `neurodiversity`, not the universal access figure.** That
+figure reads, to most people, as physical or visual disability. Most of these
+axes are about reading, attention and sensory load. The infinity loop is the
+symbol the neurodivergent community chose for itself — and in gold, the one
+autistic self-advocates adopted specifically to displace the puzzle piece.
+Puzzle-piece imagery is banned in BRAINS copy and will never appear here.
+
+**The label defaults to "Display & reading", not "Accessibility".** A large
+share of the people these controls help do not think of themselves as disabled
+and will not open a menu that says they are. Someone who finds long lines hard
+to track is looking for reading settings.
+
+| `icon` | Reads as |
+|---|---|
+| `neurodiversity` | **Default.** The infinity loop — for everyone, not only vision |
+| `accessibility` | The universal access figure. Use where visitors expect the convention |
+| `focus` | Attention and calm |
+| `sensory` | Sensory load |
+| `brains` · `shard` | Your own mark, where the control should read as part of the product |
+
+Labels worth considering: `Display & reading` · `Viewing preferences` ·
+`Reading settings` · `Comfort` · `Accessibility`. Pick the one your visitors
+would actually search for.
+
+```jsx
+<A11yTrigger icon="neurodiversity" label="Display & reading" />
+<A11yTrigger icon="brains" variant="pill" label="Make this easier to read" />
+```
+
+## Grouping the panel
+
+Thirteen axes in one flat list reads as a settings dump. `GROUPS` suggests an
+order and three headings that tell a reader this is not only a vision tool:
+
+| Group | Axes |
+|---|---|
+| **Reading** | Text size · Line spacing · Letter spacing · Line length · Reading font |
+| **Focus & calm** | Motion · Decorative images · Density · Reading guide |
+| **Colour & contrast** | Theme · Contrast · Accent · Paper tint |
+
+Use it, reorder it, or ignore it — it is a suggestion, not a constraint. A test
+asserts every axis belongs to exactly one group, so the list cannot silently
+fall out of date.
+
 ## Presets
 
 | `variant` | What it is | When to use it |
