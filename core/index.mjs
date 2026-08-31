@@ -55,9 +55,28 @@ export const LEGACY_SEPARATE_KEYS = {
 
 /** Storage keys from the pre-consolidation implementations, read once on migrate. */
 export const LEGACY_KEYS = {
-  /** shard-audit — density/motion/contrast/accent */
+  /**
+   * `brains.prefs` is written by TWO apps with different schemas, so the mapper
+   * has to read both and merge whatever it finds:
+   *
+   *   shard-audit           { density, motion, contrast, accent }
+   *   BRAINS-build-tracker  { theme, text_size, line_spacing, dyslexia }
+   *
+   * Handling only the first silently migrated nothing on the second. The two
+   * sets do not overlap, so reading both is safe — a blob simply carries the
+   * keys its own app wrote.
+   */
   'brains.prefs': (v) => ({
-    density: v.density, motion: v.motion, contrast: v.contrast, accent: v.accent,
+    // shard-audit
+    density: v.density,
+    motion: v.motion,
+    contrast: v.contrast,
+    accent: v.accent,
+    // BRAINS-build-tracker — snake_case, and text size in upper case
+    theme: v.theme,
+    textSize: typeof v.text_size === 'string' ? v.text_size.toLowerCase() : undefined,
+    lineSpacing: typeof v.line_spacing === 'string' ? v.line_spacing.toLowerCase() : undefined,
+    readingFont: v.dyslexia === true ? 'hyperlegible' : undefined,
   }),
   /**
    * shard-website — the live Shard Labs marketing site. Same four axes again,

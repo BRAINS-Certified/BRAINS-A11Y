@@ -217,3 +217,24 @@ test('iconSvg escapes a caller-supplied title and refuses a junk size', async ()
     assert.match(svg, /width="\d+(\.\d+)?"/, 'width is always numeric');
   }
 });
+
+test('brains.prefs is written by two apps with different schemas', async () => {
+  const { LEGACY_KEYS } = await import('../core/index.mjs');
+  const map = LEGACY_KEYS['brains.prefs'];
+
+  // shard-audit
+  const audit = map({ density: 'compact', motion: 'reduced', contrast: 'high', accent: 'teal' });
+  assert.equal(audit.density, 'compact');
+  assert.equal(audit.accent, 'teal');
+
+  // BRAINS-build-tracker — snake_case, upper-case text size
+  const tracker = map({ theme: 'bone', text_size: 'L', line_spacing: 'roomy', dyslexia: true });
+  assert.equal(tracker.theme, 'bone');
+  assert.equal(tracker.textSize, 'l');
+  assert.equal(tracker.lineSpacing, 'roomy');
+  assert.equal(tracker.readingFont, 'hyperlegible');
+
+  // each blob carries only its own app's keys; neither loses anything
+  assert.equal(normalise(audit, false).contrast, 'high');
+  assert.equal(normalise(tracker, false).textSize, 'l');
+});

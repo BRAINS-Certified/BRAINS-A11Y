@@ -37,7 +37,10 @@ try{if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)p.
 var cur=j(g(C.key));
 if(cur){set(cur)}
 else{
-  var l0=j(g('brains.prefs'));if(l0)set(l0);
+  var l0=j(g('brains.prefs'));
+  if(l0){set(l0);set({textSize:typeof l0.text_size==='string'?l0.text_size.toLowerCase():undefined,
+    lineSpacing:typeof l0.line_spacing==='string'?l0.line_spacing.toLowerCase():undefined});
+    if(l0.dyslexia===true)p.readingFont='hyperlegible'}
   var l1=j(g('shard.viewing.v1'));
   if(l1){set(l1);if(l1.dyslexia===true)p.readingFont='hyperlegible'}
   var l2=j(g('shard.prefs'));

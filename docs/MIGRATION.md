@@ -8,7 +8,7 @@ preference they had already set.
 
 | Legacy key | Written by | Axes recovered |
 |---|---|---|
-| `brains.prefs` | shard-audit | density, motion, contrast, accent |
+| `brains.prefs` | shard-audit **and** BRAINS-build-tracker | **Two apps share this key with different schemas.** shard-audit writes `{density, motion, contrast, accent}`; the build tracker writes `{theme, text_size, line_spacing, dyslexia}` in snake_case with an upper-case text size. The mapper reads both; the key sets do not overlap, so a blob simply carries whatever its own app wrote |
 | `shard.viewing.v1` | shard-financial-tool | theme, text size, line spacing, and `dyslexia: true` → `readingFont: 'hyperlegible'` |
 | `sb:theme`, `sb:text-size`, `sb:line-spacing`, `sb:dyslexia` | shard-books-site | the same four axes, but as separate string keys rather than a JSON blob |
 | `shard.prefs` | shard-website (shardlabs.com.au) | the same four axes again, with its own casing — `light` for Bone, `S`/`M`/`L`, `Standard`/`Tight`/`Roomy` |
