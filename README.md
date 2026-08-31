@@ -1,23 +1,34 @@
-<!-- markdownlint-disable MD041 -->
+<!-- markdownlint-disable-file MD041 MD001 -->
 <div align="center">
 
-<img src="assets/icons/a11y-neurodiversity.svg" alt="" width="72">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/BRAINS-Certified/.github/main/profile/brand-mark-dark-bg.png">
+  <img alt="BRAINS" src="https://raw.githubusercontent.com/BRAINS-Certified/.github/main/profile/brand-mark-light-bg.png" width="220">
+</picture>
 
-# brains-a11y
+# BRAINS A11Y
 
-<!-- markdownlint-disable-next-line MD001 -->
 ### Accessibility preferences that actually move the page
 
 <br />
 
-[![Licence](https://img.shields.io/badge/licence-MIT-0A0A0A?style=for-the-badge&labelColor=7A5500)](LICENSE)
-[![WCAG](https://img.shields.io/badge/WCAG-2.2%20AA-7A5500?style=for-the-badge&labelColor=0A0A0A)](docs/EVIDENCE.md)
+[![Version](https://img.shields.io/badge/version-v1.0.0-D99518?style=for-the-badge&labelColor=0A0A0A)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-ready-D99518?style=for-the-badge&labelColor=0A0A0A)](ROADMAP.md)
+[![BRAINS Certified Gold](https://img.shields.io/badge/BRAINS%20Certified-Gold-D99518?style=for-the-badge&labelColor=0A0A0A)](https://github.com/BRAINS-Certified/BRAINS-template-repo)
+[![Licence](https://img.shields.io/badge/licence-MIT-0A0A0A?style=for-the-badge&labelColor=D99518)](LICENSE)
+[![WCAG](https://img.shields.io/badge/WCAG-2.2%20AA-2A8B91?style=for-the-badge&labelColor=0A0A0A)](docs/CHECKLIST.md)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-2A8B91?style=for-the-badge&labelColor=0A0A0A)](package.json)
-[![BRAINS Certified Gold](https://img.shields.io/badge/BRAINS%20Certified-Gold-D99518?style=for-the-badge&labelColor=0A0A0A)](https://github.com/BRAINS-Certified/BRAINS-template-repo/blob/main/CERTIFIED.md)
+[![Discord](https://img.shields.io/badge/Discord-Community-5865F2?style=for-the-badge&logo=discord&logoColor=FFFFFF&labelColor=0A0A0A)](https://discord.gg/BEmTXXscBr)
+[![Bluesky](https://img.shields.io/badge/Bluesky-%40brainscertified.com-D99518?style=for-the-badge&logo=bluesky&logoColor=FFFFFF&labelColor=0A0A0A)](https://bsky.app/profile/brainscertified.com)
 
 <br />
 
-[Try it ↓](#the-eleven-axes) &nbsp;·&nbsp; [Install ↓](#install) &nbsp;·&nbsp; [Evidence ↓](docs/EVIDENCE.md) &nbsp;·&nbsp; [Checklist ↓](docs/CHECKLIST.md) &nbsp;·&nbsp; [Roadmap ↓](ROADMAP.md)
+<a href="https://github.com/BRAINS-Certified/BRAINS-template-repo" title="Meets the BRAINS standard floor"><img src="assets/badges/brains-certified-gold.svg" alt="BRAINS Certified — Gold Standard" height="86"></a>
+
+<br />
+<br />
+
+[The axes ↓](#the-eleven-axes) &nbsp;·&nbsp; [Install ↓](#install) &nbsp;·&nbsp; [Evidence ↓](docs/EVIDENCE.md) &nbsp;·&nbsp; [Checklist ↓](docs/CHECKLIST.md) &nbsp;·&nbsp; [Roadmap ↓](ROADMAP.md)
 
 </div>
 
@@ -35,7 +46,7 @@ Zero dependencies. No build step required. Works in React, in Astro, and on a st
 
 Accessibility overlays inject a widget that promises compliance and does not deliver it. Disabled users have said so repeatedly, and hundreds of practitioners have signed their names to the point. Some of those products have been sued over it.
 
-`brains-a11y` is the opposite thing, and the difference is worth being precise about:
+**BRAINS A11Y** is the opposite thing, and the difference is worth being precise about:
 
 | An overlay | This |
 |---|---|
@@ -101,7 +112,7 @@ These are in beta because the evidence is genuinely unsettled, and [`docs/EVIDEN
 ## Install
 
 ```bash
-npm install github:BRAINS-Certified/brains-a11y
+npm install github:BRAINS-Certified/BRAINS-A11Y
 ```
 
 ```jsx

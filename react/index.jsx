@@ -151,7 +151,7 @@ export function A11yTrigger({
  * A small mark a site can show to say which standard it follows. Optional, and
  * deliberately quiet — it states a fact, it does not claim conformance.
  */
-export function A11yMark({ href = 'https://github.com/BRAINS-Certified/brains-a11y' }) {
+export function A11yMark({ href = 'https://github.com/BRAINS-Certified/BRAINS-A11Y' }) {
   return (
     <a className="a11y-mark" href={href} rel="noopener">
       <Icon name="accessibility" size={16} />
