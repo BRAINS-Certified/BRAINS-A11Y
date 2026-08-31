@@ -13,10 +13,11 @@ const root = resolve(here, '..');
 /* Both core modules. A static page with no bundler still has to be able to
  * build a compliant radiogroup, which needs the keyboard helpers — shipping
  * only index.mjs left those sites unable to honour role="radiogroup". */
-const source = [
-  readFileSync(resolve(root, 'core/index.mjs'), 'utf8'),
-  readFileSync(resolve(root, 'core/keyboard.mjs'), 'utf8'),
-].join('\n\n');
+/* Every dependency-free core module. Listed once, here, because leaving one
+ * out is silent: the global simply lacks a function and the page throws at
+ * runtime. It has happened twice — keyboard.mjs, then icons.mjs. */
+const MODULES = ['core/index.mjs', 'core/keyboard.mjs', 'core/icons.mjs'];
+const source = MODULES.map((m) => readFileSync(resolve(root, m), 'utf8')).join('\n\n');
 
 const body = source
   .replace(/^import[^;]+;$/gm, '')

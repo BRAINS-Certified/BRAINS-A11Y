@@ -148,3 +148,15 @@ test('right-to-left reverses the horizontal arrows only', async () => {
   assert.equal(nextIndex('ArrowRight', 0, 3, true), 2);
   assert.equal(nextIndex('ArrowDown', 0, 3, true), 1, 'vertical is unchanged');
 });
+
+test('the IIFE bundle carries every dependency-free core module', async () => {
+  const { readFileSync } = await import('node:fs');
+  const bundle = readFileSync(new URL('../dist/brains-a11y.js', import.meta.url), 'utf8');
+  const surface = bundle.split('global.BrainsA11y')[1] ?? '';
+  // One name from each module. Omitting a module is otherwise silent until a
+  // page throws at runtime, which is how keyboard.mjs and icons.mjs were both
+  // missed in turn.
+  for (const name of ['normalise', 'nextIndex', 'iconSvg', 'ICONS', 'AXIS_ICONS']) {
+    assert.ok(new RegExp(`\\b${name}\\b`).test(surface), `${name} is on the global`);
+  }
+});

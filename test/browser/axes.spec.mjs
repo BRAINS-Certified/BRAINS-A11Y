@@ -20,7 +20,11 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const FIXTURE = pathToFileURL(resolve(here, 'fixture.html')).href;
+/* Defaults to the built fixture; A11Y_FIXTURE points it at any page that
+ * renders the panel, which is how the published preview gets verified too. */
+const FIXTURE = process.env.A11Y_FIXTURE
+  ? pathToFileURL(resolve(process.env.A11Y_FIXTURE)).href
+  : pathToFileURL(resolve(here, 'fixture.html')).href;
 
 /**
  * Playwright is not a dependency of this package — the default test run is
