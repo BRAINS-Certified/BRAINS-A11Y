@@ -31,6 +31,9 @@ const surface = (brand) => `
       <h3>Heading</h3>
       <p>Body copy.</p>
       <p class="muted">Muted copy.</p>
+      <p data-a11y-section>Sectioned copy for the focus guide.</p>
+      <img data-decorative alt="" width="24" height="24"
+           src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
       <div class="card"><span class="stat">4.3</span></div>
       <button class="cta" type="button">Action</button>
     </div>
@@ -56,9 +59,14 @@ ${read('tokens/panel.css')}
 ${surface('shard')}
 ${surface('brains')}
 <script>${read('dist/brains-a11y.js')}</script>
+<script type="module">${read('core/reading-guide.mjs').replace(/^export /gm, '')}
+['shard', 'brains'].forEach(function (b) {
+  attachReadingGuide({ root: document.getElementById('scope-' + b) });
+});</script>
 <script>
 (function () {
   var A = window.BrainsA11y;
+  A.setExperimental(true);   // the fixture exercises the beta channel too
   ['shard', 'brains'].forEach(function (brand) {
     var target = document.getElementById('scope-' + brand);
     var host = document.getElementById('panelwrap-' + brand);
@@ -66,12 +74,13 @@ ${surface('brains')}
     var buttons = [];
     var panel = document.createElement('div');
     panel.className = 'a11y-panel';
-    Object.keys(A.AXES).forEach(function (axis) {
+    var AXES = A.resolveAxes(true);
+    Object.keys(AXES).forEach(function (axis) {
       var group = document.createElement('div');
       group.setAttribute('role', 'radiogroup');
       group.setAttribute('aria-label', A.LABELS[axis]._);
       group.className = 'a11y-panel__options';
-      A.AXES[axis].forEach(function (value) {
+      AXES[axis].forEach(function (value) {
         var b = document.createElement('button');
         b.type = 'button';
         b.setAttribute('role', 'radio');
@@ -86,7 +95,7 @@ ${surface('brains')}
       });
       group.addEventListener('keydown', function (event) {
         if (A.HANDLED_KEYS.indexOf(event.key) === -1) return;
-        var opts = A.AXES[axis];
+        var opts = AXES[axis];
         var to = A.nextIndex(event.key, opts.indexOf(prefs[axis]), opts.length);
         if (to < 0) return;
         event.preventDefault();

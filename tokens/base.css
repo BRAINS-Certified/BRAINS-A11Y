@@ -24,6 +24,11 @@
  * setting font-size and line-height rather than by inheriting a variable alone.
  *
  *   data-theme         midnight | bone
+ *   data-text-spacing  standard | wide
+ *   data-measure       standard | narrow
+ *   data-decoration    shown | hidden
+ *   data-reading-guide off | ruler | focus     (beta)
+ *   data-tint          none | warm | cool      (beta)
  *   data-density       comfortable | compact
  *   data-motion        full | reduced
  *   data-contrast      default | high
@@ -130,6 +135,20 @@ body,
   --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
   --font-display: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
 }
+/* OpenDyslexic. In the beta channel and documented in docs/EVIDENCE.md: it is
+ * offered because readers ask for it, not because the evidence supports a
+ * reading gain. The consuming surface must load the face; this only names it. */
+[data-reading-font='dyslexic'] {
+  --font-body: 'OpenDyslexic', 'Comic Sans MS', system-ui, sans-serif;
+  --font-display: 'OpenDyslexic', 'Comic Sans MS', system-ui, sans-serif;
+}
+[data-reading-font='dyslexic'] em,
+[data-reading-font='dyslexic'] i,
+[data-reading-font='dyslexic'] cite {
+  font-style: normal;
+  font-weight: 700;
+}
+
 [data-reading-font='hyperlegible'] em,
 [data-reading-font='hyperlegible'] i,
 [data-reading-font='hyperlegible'] cite {
@@ -139,8 +158,12 @@ body,
 [data-reading-font='hyperlegible'] p { margin-block: 1em; }
 
 /* ── Contrast ───────────────────────────────────────────────────────────────
- * High contrast strengthens borders and lifts muted text to full ink. Brand
- * files supply --ink-muted-high and --line-high for their own palette. */
+ * Three settings, not two, because contrast is not a single dial that everyone
+ * wants turned up. High strengthens borders and lifts muted text to full ink.
+ * Soft does the opposite: it lowers luminance and takes the edge off pure
+ * white and pure black, which is what many autistic, migraine-prone and
+ * photophobic readers actually need. Offering only "more" quietly assumes
+ * everyone's need points the same way. */
 [data-contrast='high'] {
   --ink-muted: var(--ink-muted-high, var(--ink));
   --line: var(--line-high, currentColor);
@@ -148,6 +171,77 @@ body,
 [data-contrast='high'] :focus-visible {
   outline-width: 3px;
 }
+
+[data-contrast='soft'] {
+  --bg: var(--bg-soft, var(--bg));
+  --surface: var(--surface-soft, var(--surface));
+  --ink: var(--ink-soft, var(--ink));
+  --ink-muted: var(--ink-muted-soft, var(--ink-muted));
+}
+
+/* ── Letter and word spacing ────────────────────────────────────────────────
+ * The values are those a page must survive under WCAG 2.2 SC 1.4.12 (Text
+ * Spacing), offered as a control rather than only tested against. Loosening
+ * tracking is one of the better-supported adjustments for dyslexic readers. */
+[data-text-spacing='wide'] {
+  --a11y-letter-spacing: 0.12em;
+  --a11y-word-spacing: 0.16em;
+  --a11y-paragraph-spacing: 2em;
+}
+[data-text-spacing='wide'] p,
+[data-text-spacing='wide'] li,
+[data-text-spacing='wide'] dd,
+[data-text-spacing='wide'] blockquote {
+  letter-spacing: var(--a11y-letter-spacing);
+  word-spacing: var(--a11y-word-spacing);
+}
+[data-text-spacing='wide'] p + p { margin-block-start: var(--a11y-paragraph-spacing); }
+
+/* ── Line length ────────────────────────────────────────────────────────────
+ * Long lines lose the reader on the return sweep. Standard caps running text
+ * at a conventional measure; narrow tightens it further, which helps readers
+ * who track line-to-line with difficulty. Applies to running text only —
+ * never to tables, code or layout containers. */
+[data-measure] :is(p, li, dd, blockquote, h1, h2, h3, h4) { max-width: var(--a11y-measure, 72ch); }
+[data-measure='standard'] { --a11y-measure: 72ch; }
+[data-measure='narrow']   { --a11y-measure: 52ch; }
+
+/* ── Decorative imagery ─────────────────────────────────────────────────────
+ * Hides imagery that carries no information, for readers who find it noise.
+ * Deliberately opt-in per element: a surface marks what is decorative with
+ * `data-decorative`, because only the surface knows. Nothing that conveys
+ * meaning should ever carry that attribute. */
+[data-decoration='hidden'] [data-decorative] { display: none !important; }
+[data-decoration='hidden'] [data-decorative-bg] { background-image: none !important; }
+
+/* ── Reading guide (beta) ───────────────────────────────────────────────────
+ * Ruler draws a band across the line under the pointer or caret. Focus dims
+ * everything except the section being read. Both need the small module in
+ * core/reading-guide.mjs to track position; the CSS alone does nothing. */
+[data-reading-guide='ruler'] .a11y-ruler {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: var(--a11y-ruler-height, 2.4em);
+  background: var(--accent);
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 2147483000;
+  transform: translateY(var(--a11y-ruler-y, 0));
+}
+[data-reading-guide='focus'] [data-a11y-section] {
+  opacity: 0.35;
+  transition: opacity var(--a11y-motion-duration);
+}
+[data-reading-guide='focus'] [data-a11y-section][data-a11y-current] { opacity: 1; }
+
+/* ── Paper tint (beta) ──────────────────────────────────────────────────────
+ * A coloured ground, which some readers report helps and others do not. The
+ * research on coloured overlays is contested; this is offered as a preference,
+ * never as a treatment, and docs/EVIDENCE.md says so plainly. Light grounds
+ * only — tinting a dark ground does not do the same thing. */
+[data-theme='bone'][data-tint='warm'] { --bg: var(--bg-tint-warm, #F7EFE0); }
+[data-theme='bone'][data-tint='cool'] { --bg: var(--bg-tint-cool, #EAF0F4); }
 
 /* ── Operating-system signals ───────────────────────────────────────────────
  * A person who has already told their OS what they need should not have to

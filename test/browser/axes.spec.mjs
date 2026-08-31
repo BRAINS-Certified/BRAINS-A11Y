@@ -50,7 +50,18 @@ const PROBES = {
   // move there. The display face moves on both brands.
   readingFont: { sel: 'h3',               prop: 'fontFamily' },
   accent:      { sel: '.stat',            prop: 'color' },
+  textSpacing: { sel: 'p',                prop: 'letterSpacing' },
+  measure:     { sel: 'p',                prop: 'maxWidth' },
+  decoration:  { sel: '[data-decorative]', prop: 'display' },
+  // Beta. The guide needs a composite reading: `ruler` shows a band and dims
+  // nothing, `focus` dims sections and shows no band — one property cannot
+  // tell all three apart.
+  readingGuide: { composite: true },
+  tint:         { sel: null,              prop: 'backgroundColor' },
 };
+
+/** Axes whose visible effect needs a specific theme to be observable. */
+const NEEDS_LIGHT_THEME = new Set(['tint']);
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -62,7 +73,7 @@ await page.goto(FIXTURE);
 await page.waitForTimeout(400);
 
 const axes = await page.evaluate(() =>
-  Object.fromEntries(Object.entries(window.BrainsA11y.AXES).map(([k, v]) => [k, [...v]])));
+  Object.fromEntries(Object.entries(window.BrainsA11y.resolveAxes(true)).map(([k, v]) => [k, [...v]])));
 
 let pass = 0;
 const failures = [];
@@ -72,14 +83,28 @@ for (const brand of ['shard', 'brains']) {
     const probe = PROBES[axis];
     const seen = new Map();
 
+    // Paper tint only applies on a light ground, by design.
+    if (NEEDS_LIGHT_THEME.has(axis)) {
+      await page.click(`#panelwrap-${brand} [data-axis="theme"][data-value="bone"]`);
+      await page.waitForTimeout(60);
+    }
+
     for (const value of values) {
       await page.click(`#panelwrap-${brand} [data-axis="${axis}"][data-value="${value}"]`);
       await page.waitForTimeout(60);
 
-      const observed = await page.evaluate(([id, sel, prop]) => {
-        const scope = document.getElementById(id);
-        return getComputedStyle(sel ? scope.querySelector(sel) : scope)[prop];
-      }, [`scope-${brand}`, probe.sel, probe.prop]);
+      const observed = probe.composite
+        ? await page.evaluate((id) => {
+            const scope = document.getElementById(id);
+            const section = scope.querySelector('[data-a11y-section]');
+            const ruler = scope.querySelector('.a11y-ruler');
+            const band = ruler ? getComputedStyle(ruler).position : 'none';
+            return `${getComputedStyle(section).opacity}/${band}`;
+          }, `scope-${brand}`)
+        : await page.evaluate(([id, sel, prop]) => {
+            const scope = document.getElementById(id);
+            return getComputedStyle(sel ? scope.querySelector(sel) : scope)[prop];
+          }, [`scope-${brand}`, probe.sel, probe.prop]);
 
       const attr = await page.getAttribute(
         `#scope-${brand}`,
@@ -94,6 +119,11 @@ for (const brand of ['shard', 'brains']) {
     const ok = distinct.size === values.length
       && [...seen.entries()].every(([v, r]) => r.attr === v)
       && [...seen.values()].every((r) => r.checked === 'true');
+
+    if (NEEDS_LIGHT_THEME.has(axis)) {
+      await page.click(`#panelwrap-${brand} [data-axis="theme"][data-value="midnight"]`);
+      await page.waitForTimeout(60);
+    }
 
     if (ok) { pass++; console.log(`  PASS  ${brand.padEnd(7)} ${axis}`); }
     else {
