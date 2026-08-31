@@ -26,10 +26,15 @@
  * setting font-size and line-height rather than by inheriting a variable alone.
  *
  *   data-theme         midnight | bone
+ *   data-text-spacing  standard | wide
+ *   data-measure       standard | narrow
+ *   data-decoration    shown | hidden
+ *   data-reading-guide off | ruler | focus     (beta)
+ *   data-tint          none | warm | cool      (beta)
  *   data-density       comfortable | compact
  *   data-motion        full | reduced
  *   data-contrast      default | high
- *   data-text-size     s | m | l
+ *   data-text-size     s | m | l | xl | xxl   (87.5% .. 200%)
  *   data-line-spacing  tight | standard | roomy
  *   data-reading-font  standard | hyperlegible
  *   data-accent        gold | teal | blue
@@ -132,6 +137,20 @@ body,
   --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
   --font-display: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
 }
+/* OpenDyslexic. In the beta channel and documented in docs/EVIDENCE.md: it is
+ * offered because readers ask for it, not because the evidence supports a
+ * reading gain. The consuming surface must load the face; this only names it. */
+[data-reading-font='dyslexic'] {
+  --font-body: 'OpenDyslexic', 'Comic Sans MS', system-ui, sans-serif;
+  --font-display: 'OpenDyslexic', 'Comic Sans MS', system-ui, sans-serif;
+}
+[data-reading-font='dyslexic'] em,
+[data-reading-font='dyslexic'] i,
+[data-reading-font='dyslexic'] cite {
+  font-style: normal;
+  font-weight: 700;
+}
+
 [data-reading-font='hyperlegible'] em,
 [data-reading-font='hyperlegible'] i,
 [data-reading-font='hyperlegible'] cite {
@@ -141,8 +160,12 @@ body,
 [data-reading-font='hyperlegible'] p { margin-block: 1em; }
 
 /* ── Contrast ───────────────────────────────────────────────────────────────
- * High contrast strengthens borders and lifts muted text to full ink. Brand
- * files supply --ink-muted-high and --line-high for their own palette. */
+ * Three settings, not two, because contrast is not a single dial that everyone
+ * wants turned up. High strengthens borders and lifts muted text to full ink.
+ * Soft does the opposite: it lowers luminance and takes the edge off pure
+ * white and pure black, which is what many autistic, migraine-prone and
+ * photophobic readers actually need. Offering only "more" quietly assumes
+ * everyone's need points the same way. */
 [data-contrast='high'] {
   --ink-muted: var(--ink-muted-high, var(--ink));
   --line: var(--line-high, currentColor);
@@ -150,6 +173,77 @@ body,
 [data-contrast='high'] :focus-visible {
   outline-width: 3px;
 }
+
+[data-contrast='soft'] {
+  --bg: var(--bg-soft, var(--bg));
+  --surface: var(--surface-soft, var(--surface));
+  --ink: var(--ink-soft, var(--ink));
+  --ink-muted: var(--ink-muted-soft, var(--ink-muted));
+}
+
+/* ── Letter and word spacing ────────────────────────────────────────────────
+ * The values are those a page must survive under WCAG 2.2 SC 1.4.12 (Text
+ * Spacing), offered as a control rather than only tested against. Loosening
+ * tracking is one of the better-supported adjustments for dyslexic readers. */
+[data-text-spacing='wide'] {
+  --a11y-letter-spacing: 0.12em;
+  --a11y-word-spacing: 0.16em;
+  --a11y-paragraph-spacing: 2em;
+}
+[data-text-spacing='wide'] p,
+[data-text-spacing='wide'] li,
+[data-text-spacing='wide'] dd,
+[data-text-spacing='wide'] blockquote {
+  letter-spacing: var(--a11y-letter-spacing);
+  word-spacing: var(--a11y-word-spacing);
+}
+[data-text-spacing='wide'] p + p { margin-block-start: var(--a11y-paragraph-spacing); }
+
+/* ── Line length ────────────────────────────────────────────────────────────
+ * Long lines lose the reader on the return sweep. Standard caps running text
+ * at a conventional measure; narrow tightens it further, which helps readers
+ * who track line-to-line with difficulty. Applies to running text only —
+ * never to tables, code or layout containers. */
+[data-measure] :is(p, li, dd, blockquote, h1, h2, h3, h4) { max-width: var(--a11y-measure, 72ch); }
+[data-measure='standard'] { --a11y-measure: 72ch; }
+[data-measure='narrow']   { --a11y-measure: 52ch; }
+
+/* ── Decorative imagery ─────────────────────────────────────────────────────
+ * Hides imagery that carries no information, for readers who find it noise.
+ * Deliberately opt-in per element: a surface marks what is decorative with
+ * `data-decorative`, because only the surface knows. Nothing that conveys
+ * meaning should ever carry that attribute. */
+[data-decoration='hidden'] [data-decorative] { display: none !important; }
+[data-decoration='hidden'] [data-decorative-bg] { background-image: none !important; }
+
+/* ── Reading guide (beta) ───────────────────────────────────────────────────
+ * Ruler draws a band across the line under the pointer or caret. Focus dims
+ * everything except the section being read. Both need the small module in
+ * core/reading-guide.mjs to track position; the CSS alone does nothing. */
+[data-reading-guide='ruler'] .a11y-ruler {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: var(--a11y-ruler-height, 2.4em);
+  background: var(--accent);
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 2147483000;
+  transform: translateY(var(--a11y-ruler-y, 0));
+}
+[data-reading-guide='focus'] [data-a11y-section] {
+  opacity: 0.35;
+  transition: opacity var(--a11y-motion-duration);
+}
+[data-reading-guide='focus'] [data-a11y-section][data-a11y-current] { opacity: 1; }
+
+/* ── Paper tint (beta) ──────────────────────────────────────────────────────
+ * A coloured ground, which some readers report helps and others do not. The
+ * research on coloured overlays is contested; this is offered as a preference,
+ * never as a treatment, and docs/EVIDENCE.md says so plainly. Light grounds
+ * only — tinting a dark ground does not do the same thing. */
+[data-theme='bone'][data-tint='warm'] { --bg: var(--bg-tint-warm, #F7EFE0); }
+[data-theme='bone'][data-tint='cool'] { --bg: var(--bg-tint-cool, #EAF0F4); }
 
 /* ── Operating-system signals ───────────────────────────────────────────────
  * A person who has already told their OS what they need should not have to
@@ -261,6 +355,13 @@ body,
     --line-high: rgba(255, 255, 255, 0.38);
     --overlay-bg: #132842;
 
+  
+  /* Soft contrast — lower luminance, no pure white or pure black. */
+  --bg-soft: #131E2E;
+  --surface-soft: #1B2839;
+  --ink-muted-soft: #9BA9BC;
+  --ink-soft: #C9D3E0;
+
     --accent: #FCC14D;         /* 11.11:1 on bg */
     --accent-ink: #0A1628;
     --focus-ring: rgba(252, 193, 77, 0.75);
@@ -280,6 +381,12 @@ body,
     --line: rgba(10, 22, 40, 0.12);
     --line-high: rgba(10, 22, 40, 0.45);
     --overlay-bg: #FFFFFF;
+
+  
+    --bg-soft: #EDE6D4;
+    --surface-soft: #F5F0E4;
+    --ink-muted-soft: #566476;
+    --ink-soft: #24303F;
 
     --accent: #7A5500;         /* 5.75:1 on bg · 6.72:1 on surface */
     --accent-ink: #FFFFFF;
@@ -340,6 +447,13 @@ body,
     --line-high: rgba(255, 255, 255, 0.36);
     --overlay-bg: #181818;
 
+  
+  /* Soft contrast — lower luminance, no pure white or pure black. */
+  --bg-soft: #17171A;
+  --surface-soft: #202024;
+  --ink-muted-soft: #8A8A8A;
+  --ink-soft: #D6D6D6;
+
     --accent: #FCC14D;         /* 12.14:1 on bg */
     --accent-ink: #0A0A0A;
     --focus-ring: rgba(252, 193, 77, 0.75);
@@ -359,6 +473,12 @@ body,
     --line: rgba(0, 0, 0, 0.10);
     --line-high: rgba(0, 0, 0, 0.45);
     --overlay-bg: #FFFFFF;
+
+  
+    --bg-soft: #F2F2F0;
+    --surface-soft: #E9E9E6;
+    --ink-muted-soft: #6A6A6A;
+    --ink-soft: #26262A;
 
     --accent: #7A5500;         /* 6.72:1 on bg */
     --accent-ink: #FFFFFF;
@@ -479,6 +599,9 @@ body,
       <h3>Heading</h3>
       <p>Body copy.</p>
       <p class="muted">Muted copy.</p>
+      <p data-a11y-section>Sectioned copy for the focus guide.</p>
+      <img data-decorative alt="" width="24" height="24"
+           src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
       <div class="card"><span class="stat">4.3</span></div>
       <button class="cta" type="button">Action</button>
     </div>
@@ -493,6 +616,9 @@ body,
       <h3>Heading</h3>
       <p>Body copy.</p>
       <p class="muted">Muted copy.</p>
+      <p data-a11y-section>Sectioned copy for the focus guide.</p>
+      <img data-decorative alt="" width="24" height="24"
+           src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
       <div class="card"><span class="stat">4.3</span></div>
       <button class="cta" type="button">Action</button>
     </div>
@@ -570,34 +696,122 @@ const LEGACY_KEYS = {
   }),
 };
 
-/** Allowed values per axis. First entry is the default. */
+/**
+ * Stable axes. First entry is the default, and every default renders as the
+ * stock appearance.
+ */
 const AXES = /** @type {const} */ ({
   theme: ['midnight', 'bone'],
+  accent: ['gold', 'teal', 'blue'],
+  contrast: ['default', 'high', 'soft'],
   density: ['comfortable', 'compact'],
-  motion: ['full', 'reduced'],
-  contrast: ['default', 'high'],
   textSize: ['m', 's', 'l', 'xl', 'xxl'],
   lineSpacing: ['standard', 'tight', 'roomy'],
+  textSpacing: ['standard', 'wide'],
+  measure: ['standard', 'narrow'],
   readingFont: ['standard', 'hyperlegible'],
-  accent: ['gold', 'teal', 'blue'],
+  motion: ['full', 'reduced'],
+  decoration: ['shown', 'hidden'],
 });
+
+/**
+ * Axes still in beta. Off unless a viewer or an app opts in — see
+ * {@link setExperimental}. They are here to be tried and reported on, not
+ * relied upon: values may change or be withdrawn.
+ */
+const EXPERIMENTAL_AXES = /** @type {const} */ ({
+  readingGuide: ['off', 'ruler', 'focus'],
+  tint: ['none', 'warm', 'cool'],
+});
+
+/**
+ * Extra values on otherwise-stable axes, also behind the beta opt-in.
+ *
+ * `readingFont: 'dyslexic'` (OpenDyslexic) sits here deliberately. Readers ask
+ * for it and it belongs in a beta channel so they can, but the published
+ * evidence does not show a reliable reading gain over a good sans-serif — see
+ * docs/EVIDENCE.md. Atkinson Hyperlegible is in the stable set because its
+ * claim is narrower and better supported: letter-form differentiation for low
+ * vision.
+ */
+const EXPERIMENTAL_VALUES = /** @type {const} */ ({
+  readingFont: ['dyslexic'],
+});
+
+const EXPERIMENTAL_STORAGE_KEY = 'brains.a11y.experimental';
+
+/**
+ * Whether beta axes are active for this view. True when the app enabled them,
+ * when a viewer set the flag in storage, or when the URL carries `?a11y-beta`.
+ * @returns {boolean}
+ */
+function isExperimentalEnabled() {
+  if (experimentalOverride !== null) return experimentalOverride;
+  if (typeof window === 'undefined') return false;
+  try {
+    if (new URLSearchParams(window.location.search).has('a11y-beta')) return true;
+  } catch { /* no location, or an opaque origin */ }
+  try {
+    return window.localStorage.getItem(EXPERIMENTAL_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+let experimentalOverride = /** @type {boolean|null} */ (null);
+
+/**
+ * Turn the beta channel on or off for this view, and remember the choice.
+ * Pass null to fall back to the viewer's own flag.
+ * @param {boolean|null} on
+ */
+function setExperimental(on) {
+  experimentalOverride = on;
+  if (typeof window === 'undefined' || on === null) return;
+  try {
+    if (on) window.localStorage.setItem(EXPERIMENTAL_STORAGE_KEY, '1');
+    else window.localStorage.removeItem(EXPERIMENTAL_STORAGE_KEY);
+  } catch { /* storage blocked — the override still holds for this view */ }
+}
+
+/**
+ * The axes in force, given whether beta is on.
+ * @param {boolean} [experimental]
+ * @returns {Record<string, readonly string[]>}
+ */
+function resolveAxes(experimental = isExperimentalEnabled()) {
+  if (!experimental) return { ...AXES };
+  const merged = /** @type {Record<string, readonly string[]>} */ ({ ...AXES });
+  for (const [axis, extra] of Object.entries(EXPERIMENTAL_VALUES)) {
+    merged[axis] = [...(merged[axis] ?? []), ...extra];
+  }
+  return { ...merged, ...EXPERIMENTAL_AXES };
+}
 
 /** The data-* attribute each axis writes to <html>. */
 const ATTRIBUTES = /** @type {const} */ ({
   theme: 'data-theme',
-  density: 'data-density',
-  motion: 'data-motion',
+  accent: 'data-accent',
   contrast: 'data-contrast',
+  density: 'data-density',
   textSize: 'data-text-size',
   lineSpacing: 'data-line-spacing',
+  textSpacing: 'data-text-spacing',
+  measure: 'data-measure',
   readingFont: 'data-reading-font',
-  accent: 'data-accent',
+  motion: 'data-motion',
+  decoration: 'data-decoration',
+  readingGuide: 'data-reading-guide',
+  tint: 'data-tint',
 });
 
-/** @type {Preferences} */
+/** Defaults for every axis, stable and beta alike. */
 const DEFAULTS = Object.freeze(
   /** @type {any} */ (
-    Object.fromEntries(Object.entries(AXES).map(([axis, values]) => [axis, values[0]]))
+    Object.fromEntries(
+      [...Object.entries(AXES), ...Object.entries(EXPERIMENTAL_AXES)]
+        .map(([axis, values]) => [axis, values[0]]),
+    )
   ),
 );
 
@@ -608,12 +822,19 @@ const DEFAULTS = Object.freeze(
  * @param {unknown} input
  * @returns {Preferences}
  */
-function normalise(input) {
+function normalise(input, experimental = isExperimentalEnabled()) {
   const source = input && typeof input === 'object' ? /** @type {any} */ (input) : {};
+  const effective = resolveAxes(experimental);
   const out = /** @type {any} */ ({});
-  for (const [axis, values] of Object.entries(AXES)) {
+  // Every axis is always present, so a page never reads undefined. Beta axes
+  // simply hold their default while the channel is off.
+  for (const [axis, values] of Object.entries({ ...AXES, ...EXPERIMENTAL_AXES })) {
+    // An axis that is gated off accepts only its default. Falling back to the
+    // full value list here would have let a stored beta value through with the
+    // channel closed.
+    const allowed = effective[axis] ?? [values[0]];
     const value = source[axis];
-    out[axis] = typeof value === 'string' && values.includes(value) ? value : values[0];
+    out[axis] = typeof value === 'string' && allowed.includes(value) ? value : values[0];
   }
   return out;
 }
@@ -774,14 +995,22 @@ const LABELS = Object.freeze({
   theme: { _: 'Theme', midnight: 'Midnight', bone: 'Bone' },
   density: { _: 'Density', comfortable: 'Comfortable', compact: 'Compact' },
   motion: { _: 'Motion', full: 'Full', reduced: 'Reduced' },
-  contrast: { _: 'Contrast', default: 'Default', high: 'High' },
+  accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },
+  contrast: { _: 'Contrast', default: 'Default', high: 'High', soft: 'Soft' },
   textSize: {
     _: 'Text size',
     s: 'Small', m: 'Default', l: 'Large', xl: 'Larger', xxl: 'Largest',
   },
+  textSpacing: { _: 'Letter spacing', standard: 'Standard', wide: 'Wide' },
+  measure: { _: 'Line length', standard: 'Standard', narrow: 'Narrow' },
+  decoration: { _: 'Decorative images', shown: 'Shown', hidden: 'Hidden' },
+  readingGuide: { _: 'Reading guide', off: 'Off', ruler: 'Ruler', focus: 'Focus' },
+  tint: { _: 'Paper tint', none: 'None', warm: 'Warm', cool: 'Cool' },
   lineSpacing: { _: 'Line spacing', tight: 'Tight', standard: 'Standard', roomy: 'Roomy' },
-  readingFont: { _: 'Reading font', standard: 'Standard', hyperlegible: 'Hyperlegible' },
-  accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },
+  readingFont: {
+    _: 'Reading font',
+    standard: 'Standard', hyperlegible: 'Hyperlegible', dyslexic: 'OpenDyslexic',
+  },
 });
 
 /* ── internals ─────────────────────────────────────────────────────────── */
@@ -865,12 +1094,120 @@ function applyRovingTabindex(options, selected) {
   }
 }
 
-  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS, nextIndex, HANDLED_KEYS, applyRovingTabindex };
+  global.BrainsA11y = { STORAGE_KEY, LEGACY_SEPARATE_KEYS, LEGACY_KEYS, AXES, EXPERIMENTAL_AXES, EXPERIMENTAL_VALUES, EXPERIMENTAL_STORAGE_KEY, isExperimentalEnabled, setExperimental, resolveAxes, ATTRIBUTES, DEFAULTS, normalise, apply, systemTheme, read, write, init, update, announce, subscribe, LABELS, nextIndex, HANDLED_KEYS, applyRovingTabindex };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 </script>
+<script type="module">/**
+ * brains-a11y — reading guide (beta).
+ *
+ * Two aids that need position tracking, so they cannot be CSS alone:
+ *
+ *   ruler — a translucent band across the line under the pointer or the
+ *           keyboard caret, for readers who lose their place on the return
+ *           sweep.
+ *   focus — dims every section except the one being read. A surface marks its
+ *           sections with `data-a11y-section`; nothing happens without that,
+ *           because only the surface knows what a section is.
+ *
+ * Both respect reduced motion, follow the keyboard as well as the pointer, and
+ * detach cleanly. Neither ever intercepts a click.
+ */
+
+const RULER_CLASS = 'a11y-ruler';
+
+/**
+ * Attach the guide.
+ *
+ * @param {object} [options]
+ * @param {Document} [options.doc]
+ * @param {HTMLElement} [options.root]  the element carrying data-reading-guide,
+ *   default `<html>`. Pass a scoped container to run the guide inside it — the
+ *   ruler is appended within that element, because the CSS matches it as a
+ *   descendant of whatever holds the attribute.
+ * @returns {() => void} detach
+ */
+function attachReadingGuide(options = {}) {
+  const doc = options.doc
+    ?? (typeof document !== 'undefined' ? document : null);
+  if (!doc) return () => {};
+
+  const root = options.root ?? doc.documentElement;
+  detach(root);
+
+  const ruler = doc.createElement('div');
+  ruler.className = RULER_CLASS;
+  ruler.setAttribute('aria-hidden', 'true');
+  // The ruler must sit inside the element that carries the attribute, or the
+  // descendant selector never matches. At page scope that means <body>.
+  (root === doc.documentElement ? doc.body : root).appendChild(ruler);
+
+  const moveRuler = (y) => {
+    const height = ruler.offsetHeight || 0;
+    root.style.setProperty('--a11y-ruler-y', `${Math.round(y - height / 2)}px`);
+  };
+
+  const onPointer = (event) => {
+    if (root.getAttribute('data-reading-guide') !== 'ruler') return;
+    moveRuler(event.clientY);
+  };
+
+  const onFocusIn = (event) => {
+    const target = /** @type {Element} */ (event.target);
+    if (!target || typeof target.getBoundingClientRect !== 'function') return;
+    const mode = root.getAttribute('data-reading-guide');
+    if (mode === 'ruler') {
+      const box = target.getBoundingClientRect();
+      moveRuler(box.top + box.height / 2);
+    }
+    if (mode === 'focus') markCurrent(root, target.closest('[data-a11y-section]'));
+  };
+
+  const onPointerSection = (event) => {
+    if (root.getAttribute('data-reading-guide') !== 'focus') return;
+    const target = /** @type {Element} */ (event.target);
+    if (!target || typeof target.closest !== 'function') return;
+    markCurrent(root, target.closest('[data-a11y-section]'));
+  };
+
+  doc.addEventListener('pointermove', onPointer, { passive: true });
+  doc.addEventListener('pointermove', onPointerSection, { passive: true });
+  doc.addEventListener('focusin', onFocusIn);
+
+  const teardown = () => {
+    doc.removeEventListener('pointermove', onPointer);
+    doc.removeEventListener('pointermove', onPointerSection);
+    doc.removeEventListener('focusin', onFocusIn);
+    ruler.remove();
+    markCurrent(root, null);
+    root.style.removeProperty('--a11y-ruler-y');
+    delete root[STATE];
+  };
+
+  root[STATE] = teardown;
+  return teardown;
+}
+
+/** Detach any guide previously attached to this root. */
+function detach(root = typeof document !== 'undefined' ? document.documentElement : null) {
+  if (root && typeof root[STATE] === 'function') root[STATE]();
+}
+
+const STATE = '__brainsA11yGuide';
+
+function markCurrent(root, section) {
+  for (const el of root.querySelectorAll('[data-a11y-current]')) {
+    el.removeAttribute('data-a11y-current');
+  }
+  if (section) section.setAttribute('data-a11y-current', '');
+}
+
+['shard', 'brains'].forEach(function (b) {
+  attachReadingGuide({ root: document.getElementById('scope-' + b) });
+});</script>
 <script>
 (function () {
   var A = window.BrainsA11y;
+  A.setExperimental(true);   // the fixture exercises the beta channel too
   ['shard', 'brains'].forEach(function (brand) {
     var target = document.getElementById('scope-' + brand);
     var host = document.getElementById('panelwrap-' + brand);
@@ -878,12 +1215,13 @@ function applyRovingTabindex(options, selected) {
     var buttons = [];
     var panel = document.createElement('div');
     panel.className = 'a11y-panel';
-    Object.keys(A.AXES).forEach(function (axis) {
+    var AXES = A.resolveAxes(true);
+    Object.keys(AXES).forEach(function (axis) {
       var group = document.createElement('div');
       group.setAttribute('role', 'radiogroup');
       group.setAttribute('aria-label', A.LABELS[axis]._);
       group.className = 'a11y-panel__options';
-      A.AXES[axis].forEach(function (value) {
+      AXES[axis].forEach(function (value) {
         var b = document.createElement('button');
         b.type = 'button';
         b.setAttribute('role', 'radio');
@@ -898,7 +1236,7 @@ function applyRovingTabindex(options, selected) {
       });
       group.addEventListener('keydown', function (event) {
         if (A.HANDLED_KEYS.indexOf(event.key) === -1) return;
-        var opts = A.AXES[axis];
+        var opts = AXES[axis];
         var to = A.nextIndex(event.key, opts.indexOf(prefs[axis]), opts.length);
         if (to < 0) return;
         event.preventDefault();

@@ -34,6 +34,13 @@
     --line-high: rgba(255, 255, 255, 0.36);
     --overlay-bg: #181818;
 
+  
+  /* Soft contrast — lower luminance, no pure white or pure black. */
+  --bg-soft: #17171A;
+  --surface-soft: #202024;
+  --ink-muted-soft: #8A8A8A;
+  --ink-soft: #D6D6D6;
+
     --accent: #FCC14D;         /* 12.14:1 on bg */
     --accent-ink: #0A0A0A;
     --focus-ring: rgba(252, 193, 77, 0.75);
@@ -53,6 +60,12 @@
     --line: rgba(0, 0, 0, 0.10);
     --line-high: rgba(0, 0, 0, 0.45);
     --overlay-bg: #FFFFFF;
+
+  
+    --bg-soft: #F2F2F0;
+    --surface-soft: #E9E9E6;
+    --ink-muted-soft: #6A6A6A;
+    --ink-soft: #26262A;
 
     --accent: #7A5500;         /* 6.72:1 on bg */
     --accent-ink: #FFFFFF;

@@ -6,14 +6,30 @@ the stock appearance, so an absent attribute is always safe.
 
 | Axis | Attribute | Values | Default | What it does |
 |---|---|---|---|---|
-| Theme | `data-theme` | `midnight` · `bone` | `midnight` | Dark or light ground |
-| Density | `data-density` | `comfortable` · `compact` | `comfortable` | Scales the spacing rhythm to ~72% |
-| Motion | `data-motion` | `full` · `reduced` | `full` | Zeroes animation and transition durations |
-| Contrast | `data-contrast` | `default` · `high` | `default` | Strengthens borders, lifts muted text, thickens focus rings |
-| Text size | `data-text-size` | `s` · `m` · `l` · `xl` · `xxl` | `m` | Root font size at 87.5% / 100% / 125% / 160% / **200%** |
-| Line spacing | `data-line-spacing` | `tight` · `standard` · `roomy` | `standard` | Body line-height 1.4 / 1.6 / 1.9 |
-| Reading font | `data-reading-font` | `standard` · `hyperlegible` | `standard` | Atkinson Hyperlegible; drops italics for weight |
+| Theme | `data-theme` | `midnight` · `bone` | `midnight` | Dark or light ground; unset follows the OS |
 | Accent | `data-accent` | `gold` · `teal` · `blue` | `gold` | Swaps the accent token, per theme |
+| Contrast | `data-contrast` | `default` · `high` · `soft` | `default` | High strengthens; **soft lowers luminance** |
+| Density | `data-density` | `comfortable` · `compact` | `comfortable` | Scales the spacing rhythm to ~72% |
+| Text size | `data-text-size` | `s` · `m` · `l` · `xl` · `xxl` | `m` | 87.5% / 100% / 125% / 160% / **200%** |
+| Line spacing | `data-line-spacing` | `tight` · `standard` · `roomy` | `standard` | Body line-height 1.4 / 1.6 / 1.9 |
+| Letter spacing | `data-text-spacing` | `standard` · `wide` | `standard` | The SC 1.4.12 values, as a control |
+| Line length | `data-measure` | `standard` · `narrow` | `standard` | Caps running text at 72ch / 52ch |
+| Reading font | `data-reading-font` | `standard` · `hyperlegible` | `standard` | Atkinson Hyperlegible; italics become weight |
+| Motion | `data-motion` | `full` · `reduced` | `full` | Zeroes animation and transition durations |
+| Decorative images | `data-decoration` | `shown` · `hidden` | `shown` | Hides elements marked `data-decorative` |
+
+### Beta axes — behind the opt-in
+
+| Axis | Attribute | Values | Default |
+|---|---|---|---|
+| Reading guide | `data-reading-guide` | `off` · `ruler` · `focus` | `off` |
+| Paper tint | `data-tint` | `none` · `warm` · `cool` | `none` |
+
+Plus one beta value on a stable axis: `data-reading-font="dyslexic"`
+(OpenDyslexic). See `docs/EVIDENCE.md` for why each sits in beta.
+
+Enable beta with `?a11y-beta`, `setExperimental(true)`, or
+`localStorage['brains.a11y.experimental'] = '1'`.
 
 ## Where the set came from
 

@@ -68,34 +68,122 @@ export const LEGACY_KEYS = {
   }),
 };
 
-/** Allowed values per axis. First entry is the default. */
+/**
+ * Stable axes. First entry is the default, and every default renders as the
+ * stock appearance.
+ */
 export const AXES = /** @type {const} */ ({
   theme: ['midnight', 'bone'],
+  accent: ['gold', 'teal', 'blue'],
+  contrast: ['default', 'high', 'soft'],
   density: ['comfortable', 'compact'],
-  motion: ['full', 'reduced'],
-  contrast: ['default', 'high'],
   textSize: ['m', 's', 'l', 'xl', 'xxl'],
   lineSpacing: ['standard', 'tight', 'roomy'],
+  textSpacing: ['standard', 'wide'],
+  measure: ['standard', 'narrow'],
   readingFont: ['standard', 'hyperlegible'],
-  accent: ['gold', 'teal', 'blue'],
+  motion: ['full', 'reduced'],
+  decoration: ['shown', 'hidden'],
 });
+
+/**
+ * Axes still in beta. Off unless a viewer or an app opts in — see
+ * {@link setExperimental}. They are here to be tried and reported on, not
+ * relied upon: values may change or be withdrawn.
+ */
+export const EXPERIMENTAL_AXES = /** @type {const} */ ({
+  readingGuide: ['off', 'ruler', 'focus'],
+  tint: ['none', 'warm', 'cool'],
+});
+
+/**
+ * Extra values on otherwise-stable axes, also behind the beta opt-in.
+ *
+ * `readingFont: 'dyslexic'` (OpenDyslexic) sits here deliberately. Readers ask
+ * for it and it belongs in a beta channel so they can, but the published
+ * evidence does not show a reliable reading gain over a good sans-serif — see
+ * docs/EVIDENCE.md. Atkinson Hyperlegible is in the stable set because its
+ * claim is narrower and better supported: letter-form differentiation for low
+ * vision.
+ */
+export const EXPERIMENTAL_VALUES = /** @type {const} */ ({
+  readingFont: ['dyslexic'],
+});
+
+export const EXPERIMENTAL_STORAGE_KEY = 'brains.a11y.experimental';
+
+/**
+ * Whether beta axes are active for this view. True when the app enabled them,
+ * when a viewer set the flag in storage, or when the URL carries `?a11y-beta`.
+ * @returns {boolean}
+ */
+export function isExperimentalEnabled() {
+  if (experimentalOverride !== null) return experimentalOverride;
+  if (typeof window === 'undefined') return false;
+  try {
+    if (new URLSearchParams(window.location.search).has('a11y-beta')) return true;
+  } catch { /* no location, or an opaque origin */ }
+  try {
+    return window.localStorage.getItem(EXPERIMENTAL_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+let experimentalOverride = /** @type {boolean|null} */ (null);
+
+/**
+ * Turn the beta channel on or off for this view, and remember the choice.
+ * Pass null to fall back to the viewer's own flag.
+ * @param {boolean|null} on
+ */
+export function setExperimental(on) {
+  experimentalOverride = on;
+  if (typeof window === 'undefined' || on === null) return;
+  try {
+    if (on) window.localStorage.setItem(EXPERIMENTAL_STORAGE_KEY, '1');
+    else window.localStorage.removeItem(EXPERIMENTAL_STORAGE_KEY);
+  } catch { /* storage blocked — the override still holds for this view */ }
+}
+
+/**
+ * The axes in force, given whether beta is on.
+ * @param {boolean} [experimental]
+ * @returns {Record<string, readonly string[]>}
+ */
+export function resolveAxes(experimental = isExperimentalEnabled()) {
+  if (!experimental) return { ...AXES };
+  const merged = /** @type {Record<string, readonly string[]>} */ ({ ...AXES });
+  for (const [axis, extra] of Object.entries(EXPERIMENTAL_VALUES)) {
+    merged[axis] = [...(merged[axis] ?? []), ...extra];
+  }
+  return { ...merged, ...EXPERIMENTAL_AXES };
+}
 
 /** The data-* attribute each axis writes to <html>. */
 export const ATTRIBUTES = /** @type {const} */ ({
   theme: 'data-theme',
-  density: 'data-density',
-  motion: 'data-motion',
+  accent: 'data-accent',
   contrast: 'data-contrast',
+  density: 'data-density',
   textSize: 'data-text-size',
   lineSpacing: 'data-line-spacing',
+  textSpacing: 'data-text-spacing',
+  measure: 'data-measure',
   readingFont: 'data-reading-font',
-  accent: 'data-accent',
+  motion: 'data-motion',
+  decoration: 'data-decoration',
+  readingGuide: 'data-reading-guide',
+  tint: 'data-tint',
 });
 
-/** @type {Preferences} */
+/** Defaults for every axis, stable and beta alike. */
 export const DEFAULTS = Object.freeze(
   /** @type {any} */ (
-    Object.fromEntries(Object.entries(AXES).map(([axis, values]) => [axis, values[0]]))
+    Object.fromEntries(
+      [...Object.entries(AXES), ...Object.entries(EXPERIMENTAL_AXES)]
+        .map(([axis, values]) => [axis, values[0]]),
+    )
   ),
 );
 
@@ -106,12 +194,19 @@ export const DEFAULTS = Object.freeze(
  * @param {unknown} input
  * @returns {Preferences}
  */
-export function normalise(input) {
+export function normalise(input, experimental = isExperimentalEnabled()) {
   const source = input && typeof input === 'object' ? /** @type {any} */ (input) : {};
+  const effective = resolveAxes(experimental);
   const out = /** @type {any} */ ({});
-  for (const [axis, values] of Object.entries(AXES)) {
+  // Every axis is always present, so a page never reads undefined. Beta axes
+  // simply hold their default while the channel is off.
+  for (const [axis, values] of Object.entries({ ...AXES, ...EXPERIMENTAL_AXES })) {
+    // An axis that is gated off accepts only its default. Falling back to the
+    // full value list here would have let a stored beta value through with the
+    // channel closed.
+    const allowed = effective[axis] ?? [values[0]];
     const value = source[axis];
-    out[axis] = typeof value === 'string' && values.includes(value) ? value : values[0];
+    out[axis] = typeof value === 'string' && allowed.includes(value) ? value : values[0];
   }
   return out;
 }
@@ -272,14 +367,22 @@ export const LABELS = Object.freeze({
   theme: { _: 'Theme', midnight: 'Midnight', bone: 'Bone' },
   density: { _: 'Density', comfortable: 'Comfortable', compact: 'Compact' },
   motion: { _: 'Motion', full: 'Full', reduced: 'Reduced' },
-  contrast: { _: 'Contrast', default: 'Default', high: 'High' },
+  accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },
+  contrast: { _: 'Contrast', default: 'Default', high: 'High', soft: 'Soft' },
   textSize: {
     _: 'Text size',
     s: 'Small', m: 'Default', l: 'Large', xl: 'Larger', xxl: 'Largest',
   },
+  textSpacing: { _: 'Letter spacing', standard: 'Standard', wide: 'Wide' },
+  measure: { _: 'Line length', standard: 'Standard', narrow: 'Narrow' },
+  decoration: { _: 'Decorative images', shown: 'Shown', hidden: 'Hidden' },
+  readingGuide: { _: 'Reading guide', off: 'Off', ruler: 'Ruler', focus: 'Focus' },
+  tint: { _: 'Paper tint', none: 'None', warm: 'Warm', cool: 'Cool' },
   lineSpacing: { _: 'Line spacing', tight: 'Tight', standard: 'Standard', roomy: 'Roomy' },
-  readingFont: { _: 'Reading font', standard: 'Standard', hyperlegible: 'Hyperlegible' },
-  accent: { _: 'Accent', gold: 'Gold', teal: 'Teal', blue: 'Blue' },
+  readingFont: {
+    _: 'Reading font',
+    standard: 'Standard', hyperlegible: 'Hyperlegible', dyslexic: 'OpenDyslexic',
+  },
 });
 
 /* ── internals ─────────────────────────────────────────────────────────── */

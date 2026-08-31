@@ -73,6 +73,29 @@ export const PAIRS = [
   ['#0F766E', '#FFFFFF', 'AA',       'brains/bone accent teal on bg'],
   ['#1D4ED8', '#FFFFFF', 'AA',       'brains/bone accent blue on bg'],
 
+  // ── Soft contrast: lower luminance, but body text still has to clear AA ──
+  ['#C9D3E0', '#131E2E', 'AA',       'shard/midnight-soft ink on bg'],
+  ['#C9D3E0', '#1B2839', 'AA',       'shard/midnight-soft ink on surface'],
+  ['#FCC14D', '#131E2E', 'AA',       'shard/midnight-soft accent on bg'],
+  ['#24303F', '#EDE6D4', 'AA',       'shard/bone-soft ink on bg'],
+  ['#24303F', '#F5F0E4', 'AA',       'shard/bone-soft ink on surface'],
+  ['#7A5500', '#EDE6D4', 'AA',       'shard/bone-soft accent on bg'],
+  ['#D6D6D6', '#17171A', 'AA',       'brains/midnight-soft ink on bg'],
+  ['#FCC14D', '#17171A', 'AA',       'brains/midnight-soft accent on bg'],
+  ['#26262A', '#F2F2F0', 'AA',       'brains/bone-soft ink on bg'],
+  ['#7A5500', '#F2F2F0', 'AA',       'brains/bone-soft accent on bg'],
+
+  ['#9BA9BC', '#131E2E', 'AA',       'shard/midnight-soft ink-muted on bg'],
+  ['#566476', '#EDE6D4', 'AA',       'shard/bone-soft ink-muted on bg'],
+  ['#8A8A8A', '#17171A', 'AA',       'brains/midnight-soft ink-muted on bg'],
+  ['#6A6A6A', '#F2F2F0', 'AA',       'brains/bone-soft ink-muted on bg'],
+
+  // ── Paper tint (beta) still has to carry body text ───────────────────────
+  ['#0A1628', '#F7EFE0', 'AA',       'shard/bone tint-warm ink on bg'],
+  ['#0A1628', '#EAF0F4', 'AA',       'shard/bone tint-cool ink on bg'],
+  ['#7A5500', '#F7EFE0', 'AA',       'shard/bone tint-warm accent on bg'],
+  ['#7A5500', '#EAF0F4', 'AA',       'shard/bone tint-cool accent on bg'],
+
   // ── High-contrast muted text must reach AAA ──────────────────────────────
   ['#CBD5E1', '#0A1628', 'AAA',      'shard/midnight ink-muted-high on bg'],
   ['#1E293B', '#F5EDD8', 'AAA',      'shard/bone ink-muted-high on bg'],

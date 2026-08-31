@@ -1,21 +1,54 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  AXES, ATTRIBUTES, DEFAULTS, LABELS, normalise, apply, update,
+  AXES, EXPERIMENTAL_AXES, EXPERIMENTAL_VALUES, ATTRIBUTES, DEFAULTS, LABELS,
+  normalise, apply, update, resolveAxes,
 } from '../core/index.mjs';
 import { noFlashScript } from '../core/no-flash.mjs';
 
+const ALL_AXES = { ...AXES, ...EXPERIMENTAL_AXES };
+
 test('every axis default is the first allowed value', () => {
-  for (const [axis, values] of Object.entries(AXES)) {
+  for (const [axis, values] of Object.entries(ALL_AXES)) {
     assert.equal(DEFAULTS[axis], values[0], `${axis} default`);
   }
 });
 
+test('a beta axis default renders as stock, so beta-off is inert', () => {
+  assert.equal(DEFAULTS.readingGuide, 'off');
+  assert.equal(DEFAULTS.tint, 'none');
+});
+
+test('resolveAxes gates beta axes and beta values', () => {
+  const off = resolveAxes(false);
+  const on = resolveAxes(true);
+  for (const axis of Object.keys(EXPERIMENTAL_AXES)) {
+    assert.ok(!(axis in off), `${axis} hidden when beta is off`);
+    assert.ok(axis in on, `${axis} present when beta is on`);
+  }
+  for (const [axis, extra] of Object.entries(EXPERIMENTAL_VALUES)) {
+    for (const value of extra) {
+      assert.ok(!off[axis].includes(value), `${axis}/${value} hidden when off`);
+      assert.ok(on[axis].includes(value), `${axis}/${value} offered when on`);
+    }
+  }
+});
+
+test('a beta value is refused while beta is off, and kept when on', () => {
+  assert.equal(normalise({ readingFont: 'dyslexic' }, false).readingFont, 'standard');
+  assert.equal(normalise({ readingFont: 'dyslexic' }, true).readingFont, 'dyslexic');
+  assert.equal(normalise({ tint: 'warm' }, false).tint, 'none');
+  assert.equal(normalise({ tint: 'warm' }, true).tint, 'warm');
+});
+
 test('every axis has an attribute and a full label set', () => {
-  for (const [axis, values] of Object.entries(AXES)) {
+  for (const [axis, values] of Object.entries(ALL_AXES)) {
     assert.ok(ATTRIBUTES[axis], `${axis} attribute`);
     assert.ok(LABELS[axis]._, `${axis} legend`);
     for (const value of values) assert.ok(LABELS[axis][value], `${axis}/${value} label`);
+  }
+  for (const [axis, extra] of Object.entries(EXPERIMENTAL_VALUES)) {
+    for (const value of extra) assert.ok(LABELS[axis][value], `${axis}/${value} label`);
   }
 });
 
@@ -36,7 +69,9 @@ test('apply writes one data attribute per axis', () => {
   const attrs = {};
   const fake = { setAttribute: (k, v) => { attrs[k] = v; } };
   apply(DEFAULTS, fake);
-  assert.equal(Object.keys(attrs).length, Object.keys(AXES).length);
+  // Beta axes are written too, at their inert defaults, so the DOM shape does
+  // not change when a viewer turns the channel on.
+  assert.equal(Object.keys(attrs).length, Object.keys(ALL_AXES).length);
   assert.equal(attrs['data-reading-font'], 'standard');
   assert.equal(attrs['data-text-size'], 'm');
 });
@@ -62,6 +97,14 @@ test('the no-flash script names both legacy storage keys', () => {
   const script = noFlashScript();
   assert.ok(script.includes('brains.prefs'));
   assert.ok(script.includes('shard.viewing.v1'));
+});
+
+test('every stable axis is anchored somewhere in the docs', async () => {
+  const { readFileSync } = await import('node:fs');
+  const spec = readFileSync(new URL('../docs/SPEC.md', import.meta.url), 'utf8');
+  for (const attribute of Object.values(ATTRIBUTES)) {
+    assert.ok(spec.includes(attribute), `SPEC.md documents ${attribute}`);
+  }
 });
 
 test('the no-flash script covers all three legacy schemes and the OS theme', () => {
