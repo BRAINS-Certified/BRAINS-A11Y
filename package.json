@@ -1,6 +1,6 @@
 {
   "name": "@brains/a11y",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": false,
   "description": "The BRAINS accessibility standard \u2014 eight viewing-preference axes, one implementation, shared across every Shard and BRAINS surface.",
   "license": "MIT",
@@ -21,6 +21,7 @@
     "./tokens/brains.css": "./tokens/brains.css",
     "./tokens/panel.css": "./tokens/panel.css",
     "./dist/brains-a11y.js": "./dist/brains-a11y.js",
+    "./core/panel": "./core/panel.mjs",
     "./core/icons": "./core/icons.mjs",
     "./core/keyboard": "./core/keyboard.mjs",
     "./core/reading-guide": "./core/reading-guide.mjs",
@@ -40,7 +41,7 @@
   ],
   "scripts": {
     "build": "node scripts/build-iife.mjs && node scripts/build-icons.mjs",
-    "test": "node --test \"test/*.test.mjs\"",
+    "test": "node --test test/core.test.mjs test/panel.test.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "verify": "npm run check:contrast && npm test && npm run build",
     "test:browser": "node test/browser/build-fixture.mjs && node test/browser/axes.spec.mjs",

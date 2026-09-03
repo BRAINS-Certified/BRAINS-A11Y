@@ -75,57 +75,28 @@ ${surface('brains')}
 <script>
 (function () {
   var A = window.BrainsA11y;
-  A.setExperimental(true);   // the fixture exercises the beta channel too
+  /* Enable beta so the fixture exercises all axes, including readingGuide and
+   * tint — the browser suite asserts on those too. */
+  A.setExperimental(true);
+  /* Use the canonical mountPanel so the fixture tests the same code path
+   * that non-React sites will use in production. The panel reads and writes
+   * state through the same store as the computed-style assertions. */
   ['shard', 'brains'].forEach(function (brand) {
     var target = document.getElementById('scope-' + brand);
     var host = document.getElementById('panelwrap-' + brand);
-    var prefs = Object.assign({}, A.DEFAULTS);
-    var buttons = [];
-    var panel = document.createElement('div');
-    panel.className = 'a11y-panel';
-    var AXES = A.resolveAxes(true);
-    Object.keys(AXES).forEach(function (axis) {
-      var group = document.createElement('div');
-      group.setAttribute('role', 'radiogroup');
-      group.setAttribute('aria-label', A.LABELS[axis]._);
-      group.className = 'a11y-panel__options';
-      AXES[axis].forEach(function (value) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.setAttribute('role', 'radio');
-        b.className = 'a11y-panel__option';
-        b.setAttribute('data-axis', axis);
-        b.setAttribute('data-value', value);
-        b.textContent = A.LABELS[axis][value];
-        b.setAttribute('aria-label', A.LABELS[axis]._ + ': ' + A.LABELS[axis][value]);
-        b.addEventListener('click', function () {
-          prefs[axis] = value; A.apply(prefs, target); paint();
-        });
-        buttons.push(b); group.appendChild(b);
-      });
-      group.addEventListener('keydown', function (event) {
-        if (A.HANDLED_KEYS.indexOf(event.key) === -1) return;
-        var opts = AXES[axis];
-        var to = A.nextIndex(event.key, opts.indexOf(prefs[axis]), opts.length);
-        if (to < 0) return;
-        event.preventDefault();
-        prefs[axis] = opts[to];
-        A.apply(prefs, target);
-        paint();
-        group.children[to].focus();
-      });
-      panel.appendChild(group);
+    /* mountPanel wires store → UI automatically; apply keeps the scope's
+     * data attributes in sync so the computed-style probes see changes. */
+    A.mountPanel(host, { axes: Object.keys(A.resolveAxes(true)) });
+    /* Redirect clicks to also update the scope element so the browser spec's
+     * computed-style probes (which read from target, not from <html>) work. */
+    host.addEventListener('click', function (event) {
+      /* The panel has already called update() which writes <html> attributes;
+       * we just need to mirror the current store state onto the scoped target. */
+      var prefs = A.read();
+      A.apply(prefs, target);
     });
-    function paint() {
-      buttons.forEach(function (b) {
-        var ax = b.getAttribute('data-axis');
-        var on = prefs[ax] === b.getAttribute('data-value');
-        b.setAttribute('aria-checked', String(on));
-        if (on) b.setAttribute('data-active', ''); else b.removeAttribute('data-active');
-        b.tabIndex = on ? 0 : -1;
-      });
-    }
-    host.appendChild(panel); A.apply(prefs, target); paint();
+    /* Also mirror on initial render. */
+    A.apply(A.read(), target);
   });
 })();
 </script></body></html>`;

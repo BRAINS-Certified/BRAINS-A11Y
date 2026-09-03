@@ -12,7 +12,7 @@
 
 <br />
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-D99518?style=for-the-badge&labelColor=0A0A0A)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.1.0-D99518?style=for-the-badge&labelColor=0A0A0A)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-ready-D99518?style=for-the-badge&labelColor=0A0A0A)](ROADMAP.md)
 [![BRAINS Certified Gold](https://img.shields.io/badge/BRAINS%20Certified-Gold-D99518?style=for-the-badge&labelColor=0A0A0A)](https://github.com/BRAINS-Certified/BRAINS-template-repo)
 [![Licence](https://img.shields.io/badge/licence-MIT-0A0A0A?style=for-the-badge&labelColor=D99518)](LICENSE)
@@ -166,14 +166,49 @@ It exists because our own brand guide told us, in three places, to use a gold it
 ## What's in the box
 
 ```text
-core/      vanilla ES modules, zero dependencies — state, no-flash, keyboard, icons, reading guide
+core/      vanilla ES modules, zero dependencies — state, no-flash, keyboard, icons, reading guide,
+           and the canonical panel (mountPanel / mountTrigger / mount)
 tokens/    base.css (behaviour) · shard.css · brains.css · panel.css · trigger.css
 react/     A11yProvider · useA11y · A11yPanel · A11yTrigger · A11yMark · Icon · SkipLink
 astro/     NoFlash · A11yPanel · A11yTrigger — no client framework
-assets/    19 icons, one geometric family, plus a sprite
-dist/      brains-a11y.js — IIFE global, for pages with no build step
+assets/    24 icons, one geometric family, plus a sprite
+dist/      brains-a11y.js — IIFE global for pages with no build step
+           exposes: init · update · reset · subscribe · mountPanel · mountTrigger · mount · …
 docs/      SPEC · EVIDENCE · CONTRAST · CHECKLIST · MIGRATION · CONFIGURING
 ```
+
+### Static HTML — the canonical non-React panel
+
+For any page without a framework, `mountPanel` is the one-line solution that
+renders the **identical** panel as React `<A11yPanel>` — same markup, same
+class names, same keyboard behaviour, same store:
+
+```html
+<link rel="stylesheet" href="/vendor/brains-a11y/tokens/base.css">
+<link rel="stylesheet" href="/vendor/brains-a11y/tokens/shard.css">
+<link rel="stylesheet" href="/vendor/brains-a11y/tokens/panel.css">
+<script src="/vendor/brains-a11y/dist/brains-a11y.js"></script>
+
+<div id="a11y-panel"></div>
+
+<script>
+  BrainsA11y.init();
+  BrainsA11y.mountPanel('#a11y-panel');
+</script>
+```
+
+Trigger + panel together (opens/closes, handles Escape, click-outside):
+
+```js
+BrainsA11y.mount('#a11y-trigger-slot', {
+  variant: 'label',
+  label:   'Display & reading',
+  // panelTarget: '#a11y-panel-slot', // optional; defaults to a popover next to the trigger
+});
+```
+
+Copy `dist/brains-a11y.js` and the three CSS files into `vendor/` and pin the
+version in a comment. Full guide: [`docs/MIGRATION.md`](docs/MIGRATION.md).
 
 ---
 
