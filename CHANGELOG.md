@@ -6,6 +6,44 @@ this project uses [semantic versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] — 2026-09-03
+
+### Added
+
+- **`BrainsA11y.mountPanel(target, opts)`** — canonical vanilla panel for
+  non-React surfaces. Renders the identical DOM structure, `.a11y-panel__*`
+  class names and accessibility semantics as the React `<A11yPanel>`:
+  heading at the configured level, one `<fieldset>` per axis with a labelled
+  `role="radiogroup"`, `<button role="radio">` with `aria-checked`, roving
+  tabindex, selection-follows-focus arrow-key navigation, full `aria-label`
+  per option, and a reset button. Wires to the same store as the React
+  panel — option clicks, external cross-tab changes and `destroy()` all work.
+  Source: `core/panel.mjs`; exported on the IIFE global.
+
+- **`BrainsA11y.mountTrigger(target, opts)`** — vanilla counterpart to the
+  React `<A11yTrigger>`. Renders `.a11y-trigger` with `data-variant`,
+  `data-placement`, `aria-haspopup="dialog"`, `aria-expanded` and
+  `aria-controls`. Returns `{ setExpanded(bool), destroy() }`.
+
+- **`BrainsA11y.mount(triggerTarget, opts)`** — convenience that wires a
+  trigger and a popover panel together with open/close, Escape and
+  click-outside handling. Returns `{ destroy() }`.
+
+- **`./core/panel`** added to the package `exports` map.
+
+- **11 unit tests** covering `mountPanel` and `mountTrigger` structure,
+  aria attributes, roving tabindex, click wiring and IIFE bundle presence.
+
+- **Browser fixture** updated to use `mountPanel` as the canonical non-React
+  panel, replacing the hand-rolled panel it previously inlined.
+
+### Changed
+
+- `npm test` now lists test files explicitly (`core.test.mjs panel.test.mjs`)
+  rather than using a glob that Node 20 does not expand in `--test` mode.
+
+---
+
 ## [1.0.0] — 2026-08-31
 
 First release. Eleven stable axes and two in beta, shared across every Shard

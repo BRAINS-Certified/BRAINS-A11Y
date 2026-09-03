@@ -76,24 +76,66 @@ import '@brains/a11y/tokens/panel.css';
 
 ## Static HTML, no build step
 
-For `shard-website` and `BRAINS-website`, which are static HTML with inline
-React via Babel and no npm:
+`BrainsA11y.mountPanel` is the **canonical non-React panel**. It renders the
+same DOM, `.a11y-panel__*` class names and accessibility semantics as the React
+`<A11yPanel>` — same markup, same keyboard contract, same store. Every
+non-React surface should use it instead of hand-rolling a panel.
 
 ```html
 <head>
   <script>/* paste the output of noFlashScript() here, inline */</script>
   <link rel="stylesheet" href="/vendor/brains-a11y/tokens/base.css">
-  <link rel="stylesheet" href="/vendor/brains-a11y/tokens/shard.css">
+  <link rel="stylesheet" href="/vendor/brains-a11y/tokens/shard.css">   <!-- or brains.css -->
   <link rel="stylesheet" href="/vendor/brains-a11y/tokens/panel.css">
-  <script src="/vendor/brains-a11y/brains-a11y.js"></script>
+  <link rel="stylesheet" href="/vendor/brains-a11y/tokens/trigger.css"> <!-- if using trigger -->
+  <script src="/vendor/brains-a11y/dist/brains-a11y.js"></script>
 </head>
-<script>
-  var prefs = BrainsA11y.init();
-  // BrainsA11y.update(prefs, { theme: 'bone' });
-</script>
+<body>
+  <a class="a11y-skip-link" href="#main">Skip to content</a>
+
+  <header>
+    <!-- Option A: panel inline, always visible -->
+    <div id="a11y-panel"></div>
+  </header>
+
+  <script>
+    // Apply saved preferences and prevent flash (init() = read() + apply())
+    BrainsA11y.init();
+
+    // Mount the canonical panel — identical to React <A11yPanel>
+    BrainsA11y.mountPanel('#a11y-panel');
+
+    // Option B: trigger + collapsible panel (open/close, Escape, click-outside)
+    // BrainsA11y.mount('#a11y-trigger-slot', {
+    //   variant: 'label',
+    //   label: 'Display & reading',
+    //   // panelTarget: '#a11y-panel-slot', // optional explicit location for the panel
+    // });
+  </script>
+</body>
 ```
 
-Copy `dist/brains-a11y.js` and the three CSS files into the site's `vendor/`
+### API reference
+
+```js
+// Panel only, in any element
+var handle = BrainsA11y.mountPanel(target, opts);
+// target — CSS selector string or Element
+// opts   — { axes?, title?, headingLevel? }   (all optional)
+// Returns { destroy() }
+
+// Trigger button only
+var trigger = BrainsA11y.mountTrigger(target, opts);
+// opts   — { variant?, placement?, icon?, label?, controls? }   (all optional)
+// Returns { setExpanded(bool), destroy() }
+
+// Trigger + popover panel wired together
+var combo = BrainsA11y.mount(triggerTarget, opts);
+// opts   — all mountTrigger opts + { panelTarget?, axes?, title?, headingLevel? }
+// Returns { destroy() }
+```
+
+Copy `dist/brains-a11y.js` and the CSS files into the site's `vendor/`
 directory. Pin the copied version in a comment so it can be re-synced.
 
 ## Replacing an existing implementation

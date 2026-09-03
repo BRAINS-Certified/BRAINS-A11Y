@@ -10,13 +10,17 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
-/* Both core modules. A static page with no bundler still has to be able to
- * build a compliant radiogroup, which needs the keyboard helpers — shipping
- * only index.mjs left those sites unable to honour role="radiogroup". */
-/* Every dependency-free core module. Listed once, here, because leaving one
- * out is silent: the global simply lacks a function and the page throws at
- * runtime. It has happened twice — keyboard.mjs, then icons.mjs. */
-const MODULES = ['core/index.mjs', 'core/keyboard.mjs', 'core/icons.mjs'];
+/* Every core module that must ship in the IIFE global. Listed explicitly here
+ * because omitting one is silent — the global simply lacks a function and the
+ * page throws at runtime. It has happened twice already (keyboard.mjs, then
+ * icons.mjs). panel.mjs comes last because it imports from the three above;
+ * in the concatenated IIFE scope those names are already in scope. */
+const MODULES = [
+  'core/index.mjs',
+  'core/keyboard.mjs',
+  'core/icons.mjs',
+  'core/panel.mjs',
+];
 const source = MODULES.map((m) => readFileSync(resolve(root, m), 'utf8')).join('\n\n');
 
 const body = source
