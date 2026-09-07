@@ -1,6 +1,6 @@
 {
   "name": "@brains/a11y",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": false,
   "description": "The BRAINS accessibility standard \u2014 eight viewing-preference axes, one implementation, shared across every Shard and BRAINS surface.",
   "license": "MIT",

@@ -48,13 +48,22 @@ const page = await context.newPage();
 await page.goto(FIXTURE);
 await page.waitForTimeout(400);
 
+/* Canonical panel options carry no data-axis/data-value; select positionally —
+ * fieldsets render in axis order, options in value order. */
+const axes = await page.evaluate(() =>
+  Object.fromEntries(Object.entries(window.BrainsA11y.resolveAxes(true)).map(([k, v]) => [k, [...v]])));
+const axisNames = Object.keys(axes);
+const optionLoc = (brand, axis, value) =>
+  page.locator(`#panelwrap-${brand} .a11y-panel__axis`).nth(axisNames.indexOf(axis))
+      .locator('.a11y-panel__option').nth(axes[axis].indexOf(value));
+
 let total = 0;
 const found = [];
 
 for (const state of STATES) {
   for (const [axis, value] of Object.entries(state.prefs)) {
     for (const brand of ['shard', 'brains']) {
-      await page.click(`#panelwrap-${brand} [data-axis="${axis}"][data-value="${value}"]`);
+      await optionLoc(brand, axis, value).click();
     }
   }
   await page.waitForTimeout(120);

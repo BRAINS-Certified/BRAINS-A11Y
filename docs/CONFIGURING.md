@@ -139,3 +139,59 @@ Optional, and deliberately quiet:
 It states which controls a site offers. **It is not a conformance badge**, and
 this package will not ship one. A badge that claims compliance without
 measuring it is the overlay problem wearing a different hat.
+
+## Making every axis actually move your app
+
+The panel sets `data-*` on `<html>` and the tokens cascade down. An axis toggles
+but *nothing visibly changes* whenever the app doesn't consume the token it
+drives. Three axes shipped inert on the first real consumer for exactly this
+reason. The failures cluster into a few shapes:
+
+**1. Consume the tokens.** Drive `font-size` / `line-height` / spacing /
+`max-width` (measure) off the `--a11y-*` custom properties. Hard-coded `px` and
+inline styles are dead to the axes. `text-size` and `line-spacing` bind to
+`[data-a11y-scope]` — mark your reading region with it so both inherit down.
+
+**2. Win the cascade with `@layer`, not specificity.** `contrast` and
+`reading-font` write tokens (`--ink-muted`, `--line`, `--font-*`) that your
+brand stylesheet often also owns. Put your brand tokens in a layer —
+`@layer brains-a11y-brand { … }` — and leave the axis rules unlayered:
+**unlayered rules beat layered ones at any specificity**, so the axis always
+wins. (Confirmed in production: contrast + reading-font both move once the brand
+CSS is layered.) If your brand CSS is *not* layered, it beats the axis on source
+order and the axis silently loses.
+
+**3. Tailwind (v4): drive density through Tailwind's own `--spacing`.** Tailwind
+spacing utilities emit fixed rem and never read this package's `--space-*`. One
+unlayered declaration fixes every `p-*`/`m-*`/`gap-*` at once:
+
+```css
+*, *::before, *::after { --spacing: calc(0.25rem * var(--a11y-density)); }
+```
+
+It overrides Tailwind's own `--spacing` theme variable, and because each utility
+sets the property **on the element**, the value resolves per element — sidestepping
+the classic trap of pre-resolving a spacing scale at `:root` (where a later
+`--a11y-density` change moves nothing). Measured at `compact`: padding 16→11.52px,
+gap 8→5.76px. Prefer this over per-element `--space-*` on any Tailwind surface.
+(Tailwind's font-size utilities each pin their own `line-height`; if line-spacing
+looks stuck, clear `line-height` on the smallest sizes in the theme config.)
+
+**4. Auditing whether an axis works: sample a property the axis can move, on an
+element that has it.** The commonest false negative is checking the wrong
+property. `contrast` moves `--ink-muted` and `--line`, not background/foreground.
+`measure` sets `max-width`, which is inert on inline elements. `reading-font` on a
+BRAINS surface only moves the *display* face (body is already Atkinson). Sampling
+the obvious property reports a working axis as dead and sends people refactoring
+correct code. The package's own `test/browser/axes.spec.mjs` is the reference
+pattern: one probe per axis naming a property it genuinely moves.
+
+## Context-appropriate axis subsets
+
+Not every surface should offer every axis, and that is a decision, not a bug.
+`mountPanel(el, { axes: [...] })` (or the React `<A11yPanel axes={[...]} />`)
+renders only the axes you list. A shared kiosk may deliberately drop `accent` —
+if the accent is aliased to the brand, one visitor's reading choice would repaint
+the buttons for whoever sits down next. A brochure site may hide `measure`/`density`
+its inline-styled content can't consume. Record these as intentional divergences
+so a later consistency pass doesn't "fix" them back.
