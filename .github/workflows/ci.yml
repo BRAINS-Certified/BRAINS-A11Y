@@ -54,8 +54,8 @@ jobs:
 
       # Playwright is intentionally NOT a package dependency (keeps the default
       # install lean). --no-save so it never touches the committed manifest.
-      - name: Install Playwright + Chromium
-        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+      - name: Install Playwright + axe (not package dependencies) + Chromium
+        run: npm i --no-save playwright @axe-core/playwright && npx playwright install --with-deps chromium
 
       - name: Assert every axis moves rendered content
         run: npm run test:browser

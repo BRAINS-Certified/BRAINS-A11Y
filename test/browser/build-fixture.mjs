@@ -36,7 +36,7 @@ const surface = (brand) => `
            src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
       <div class="card"><span class="stat">4.3</span></div>
       <label style="display:block" for="fld-${brand}">Form label text.</label>
-      <input id="fld-${brand}" type="text" placeholder="…">
+      <input id="fld-${brand}" type="text" placeholder="…" style="display:block;max-width:100%;box-sizing:border-box">
       <dl><dt style="display:block">Term</dt><dd>Definition copy.</dd></dl>
       <button class="cta" type="button">Action</button>
     </div>
