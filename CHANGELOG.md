@@ -6,6 +6,39 @@ this project uses [semantic versioning](https://semver.org/).
 
 ---
 
+## [1.1.1] — 2026-09-05
+
+### Fixed
+
+- **`measure` and `text-spacing` now reach `<label>` and `<dt>`.** Both
+  selector lists in `tokens/base.css` omitted them, so on form-heavy surfaces —
+  where most readable text sits in labels and terms — the two axes appeared
+  dead while working everywhere else. Added `label` + `dt` (deliberately not
+  `td`/`th`/`span`/`div`, per the file's running-text intent). `max-width` still
+  only bites where the consumer renders those elements block/inline-block.
+
+### Added
+
+- **CI now runs the browser axis assertion.** A new `browser` job installs
+  Playwright + Chromium and runs `test:browser` — which asserts every axis/value
+  on both brands produces an observable computed-style change, plus reflow at
+  320px and the radiogroup keyboard contract — and `test:axe`. The
+  dependency-free `verify` job cannot run the one check that matters most (that
+  toggling an axis MOVES rendered content); three axes once shipped inert past
+  green CI for exactly that reason.
+- **`docs/CONFIGURING.md` → "Making every axis actually move your app"** —
+  token consumption, the `@layer` cascade pattern (brand layered, axis
+  unlayered), the Tailwind v4 `--spacing` density recipe, the "sample a property
+  the axis can move, on an element that has it" audit rule, and
+  context-appropriate axis subsets (e.g. dropping `accent` on shared kiosks).
+
+### Tests
+
+- Fixture gains a `<label>` and `<dl><dt>`; the `text-spacing` and `measure`
+  probes now observe them, guarding the fix above against silent regression.
+
+---
+
 ## [1.1.0] — 2026-09-03
 
 ### Added

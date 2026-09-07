@@ -54,8 +54,11 @@ const PROBES = {
   // move there. The display face moves on both brands.
   readingFont: { sel: 'h2',               prop: 'fontFamily' },
   accent:      { sel: '.stat',            prop: 'color' },
-  textSpacing: { sel: 'p',                prop: 'letterSpacing' },
-  measure:     { sel: 'p',                prop: 'maxWidth' },
+  // Probe label/dt specifically: these regressed once (the selector lists
+  // omitted them), so form-heavy surfaces saw both axes do nothing. Guarding
+  // the exact elements that broke keeps the fix from silently reverting.
+  textSpacing: { sel: 'label',            prop: 'letterSpacing' },
+  measure:     { sel: 'dt',               prop: 'maxWidth' },
   decoration:  { sel: '[data-decorative]', prop: 'display' },
   // Beta. The guide needs a composite reading: `ruler` shows a band and dims
   // nothing, `focus` dims sections and shows no band — one property cannot

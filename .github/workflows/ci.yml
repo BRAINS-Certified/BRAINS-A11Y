@@ -35,3 +35,30 @@ jobs:
 
       - name: Fail if the committed bundle or icons are stale
         run: git diff --exit-code dist/ assets/icons/
+
+  # Browser gate. The `verify` job above is deliberately dependency-free, so it
+  # cannot run the one check that matters most for this package: that toggling
+  # an axis actually MOVES rendered content. Three axes once shipped inert with
+  # every attribute set correctly — attribute assertions would have passed them.
+  # This job installs a browser and asserts an observable computed-style change
+  # for every axis/value on both brands (plus reflow + the radiogroup keyboard
+  # contract), and runs an axe-core scan of the panel.
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # Playwright is intentionally NOT a package dependency (keeps the default
+      # install lean). --no-save so it never touches the committed manifest.
+      - name: Install Playwright + Chromium
+        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+
+      - name: Assert every axis moves rendered content
+        run: npm run test:browser
+
+      - name: axe-core scan of the panel
+        run: npm run test:axe
